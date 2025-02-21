@@ -1,0 +1,14 @@
+grpc:
+  client:
+    user-service:
+      address: static://user-service:9092
+      negotiationType: PLAINTEXT
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/habitsystem
+    username: habitsystem
+    password: habitsystem
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      initialization-fail-timeout: 60000

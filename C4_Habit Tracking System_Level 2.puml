@@ -1,0 +1,66 @@
+@startuml C4_Habit%20Tracking%20System_Level%202
+!if %variable_exists("RELATIVE_INCLUDE")
+  !include %get_variable_value("RELATIVE_INCLUDE")/C4_Container.puml
+!else
+  !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!endif
+
+SHOW_PERSON_OUTLINE()
+
+AddRelTag("async", $textColor=$ARROW_FONT_COLOR, $lineColor=$ARROW_COLOR, $lineStyle=DashedLine())
+AddRelTag("sync/async", $textColor=$ARROW_FONT_COLOR, $lineColor=$ARROW_COLOR, $lineStyle=DottedLine())
+
+title Container Diagram for Habit Tracking System
+
+Person(user, "Web App User", "Interacts with the system to track habits")
+
+System_Boundary(habit_system, "Habit Tracking System") {
+    Container(web_app, "Web Application", "React, TypeScript", "Provides the user interface")
+    Container(api_gateway, "API Gateway", "Spring Cloud Gateway", "Single entry point for all client requests. Handles routing, authentication, rate limiting, and load balancing")
+    Container(auth_service, "Auth Service", "Spring Boot", "Issues and validates JWT tokens")
+    Container(user_service, "User Service", "Spring Boot", "Manages user profiles and preferences")
+    Container(habit_service, "Habit Service", "Spring Boot", "Core habit tracking functionality")
+    Container(notification_service, "Notification Service", "Spring Boot", "Manages user notifications")
+    Container(report_service, "Report Service", "Spring Boot", "Generates analytics, progress reports, and achievement tracking")
+    ContainerDb(auth_db, "Auth DB", "PostgreSQL", "Stores authentication data")
+    ContainerDb(user_db, "User DB", "PostgreSQL", "Stores user data")
+    ContainerDb(habit_db, "Habit DB", "PostgreSQL", "Stores habit tracking data")
+    ContainerDb(report_db, "Report DB", "PostgreSQL", "Stores reports")
+    Container(message_broker, "RabbitMQ", "Message broker for async communication")
+}
+
+System_Ext(email_service, "Email Service", "SMTP server for sending email notifications")
+
+' JWT validation flows
+Rel_L(api_gateway, auth_service, "Routes auth requests and Validates JWT", "gRPC")
+
+' External communication remains REST
+Rel(user, web_app, "Uses", "HTTPS")
+Rel(web_app, api_gateway, "Makes requests", "HTTPS/REST")
+
+' Gateway to services using gRPC
+Rel_R(api_gateway, user_service, "Routes user requests", "gRPC")
+Rel_R(api_gateway, habit_service, "Routes habit requests", "gRPC")
+Rel_R(api_gateway, report_service, "Routes report requests", "gRPC")
+
+' Direct service-to-service communication using gRPC
+Rel(report_service, habit_service, "Fetches habit data", "gRPC", $tags="sync/async")
+Rel_R(report_service, user_service, "Fetches user data", "gRPC", $tags="sync/async")
+
+' Database relationships
+Rel(auth_service, auth_db, "Stores auth data", "JDBC")
+Rel(user_service, user_db, "Stores user data", "JDBC")
+Rel(habit_service, habit_db, "Stores habit data", "JDBC")
+Rel(report_service, report_db, "Stores report data", "JDBC")
+
+' Async event-based communication
+Rel(auth_service, message_broker, "Publishes auth events", $tags="async")
+Rel(report_service, message_broker, "Publishes report events", $tags="async")
+
+' Update notification relationships
+Rel(message_broker, notification_service, "Subscribes to events", $tags="async")
+Rel_L(notification_service, email_service, "Sends notifications", "SMTP")
+
+SHOW_LEGEND()
+footer drawn with PlantUML v. %version() and C4-PlantUML v. C4Version()
+@enduml

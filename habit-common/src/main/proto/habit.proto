@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package habit;
+option java_package = "com.habitsystem.proto.habit";
+option java_multiple_files = true;
+
+service HabitService {
+  rpc CreateHabit (CreateHabitRequest) returns (HabitResponse) {}
+  rpc GetHabit (GetHabitRequest) returns (HabitResponse) {}
+  rpc UpdateHabit (UpdateHabitRequest) returns (HabitResponse) {}
+  rpc DeleteHabit (DeleteHabitRequest) returns (DeleteHabitResponse) {}
+  rpc TrackHabit (TrackHabitRequest) returns (HabitResponse) {}
+  rpc ListHabits (ListHabitsRequest) returns (ListHabitsResponse) {}
+}
+
+message Habit {
+  string id = 1;
+  string user_id = 2;
+  string name = 3;
+  string description = 4;
+  Frequency frequency = 5;
+  int32 target_count = 6;
+  int32 current_streak = 7;
+  int32 best_streak = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message Frequency {
+  enum TimeUnit {
+    DAILY = 0;
+    WEEKLY = 1;
+    MONTHLY = 2;
+  }
+  TimeUnit time_unit = 1;
+  int32 times = 2;
+}
+
+message CreateHabitRequest {
+  string user_id = 1;
+  string name = 2;
+  string description = 3;
+  Frequency frequency = 4;
+  int32 target_count = 5;
+}
+
+message GetHabitRequest {
+  string habit_id = 1;
+}
+
+message UpdateHabitRequest {
+  string habit_id = 1;
+  string name = 2;
+  string description = 3;
+  Frequency frequency = 4;
+  int32 target_count = 5;
+}
+
+message DeleteHabitRequest {
+  string habit_id = 1;
+}
+
+message DeleteHabitResponse {
+  bool success = 1;
+}
+
+message TrackHabitRequest {
+  string habit_id = 1;
+  string date = 2;
+  int32 count = 3;
+}
+
+message ListHabitsRequest {
+  string user_id = 1;
+}
+
+message ListHabitsResponse {
+  repeated Habit habits = 1;
+}
+
+message HabitResponse {
+  Habit habit = 1;
+}

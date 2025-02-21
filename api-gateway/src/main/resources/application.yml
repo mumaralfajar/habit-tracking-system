@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+        - AddResponseHeader=Access-Control-Allow-Origin, *
+        - RequestTransformation
+        - RateLimiting
+      routes:
+        - id: auth_service
+          uri: http://auth-service:8091  # HTTP port for auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+            - PreserveHostHeader
+            - AddRequestHeader=X-Forwarded-Prefix, /api/auth
+            - AddRequestHeader=Content-Type, application/json
+            - AddResponseHeader=Content-Type, application/json
+        - id: user_service
+          uri: grpc://user-service:9092  # Change from HTTP to gRPC
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=2
+            - Authentication
+            - name: GrpcRouting
+              args:
+                serviceClass: com.habitsystem.proto.user.UserServiceGrpc
+                requestClass: com.habitsystem.proto.user.UserRequest
+                responseClass: com.habitsystem.proto.user.UserResponse
+        - id: habit-service
+          uri: grpc://localhost:9093
+          predicates:
+            - Path=/api/habits/**
+          filters:
+            - StripPrefix=2
+            - Authentication
+            - name: GrpcRouting
+              args:
+                serviceClass: com.habitsystem.proto.habit.HabitServiceGrpc
+                requestClass: com.habitsystem.proto.habit.HabitRequest
+                responseClass: com.habitsystem.proto.habit.HabitResponse
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+grpc:
+  client:
+    auth-service:
+      address: static://auth-service:9091  # gRPC port for auth-service
+      negotiationType: PLAINTEXT
+    user-service:
+      address: static://user-service:9092  # gRPC port for user-service
+      negotiationType: PLAINTEXT
+    habit-service:
+      address: static://localhost:9093
+      negotiationType: PLAINTEXT
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG

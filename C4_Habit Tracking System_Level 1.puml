@@ -1,0 +1,19 @@
+@startuml C4_Habit%20Tracking%20System_Level%201
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+SHOW_PERSON_OUTLINE()
+
+title System Context Diagram for Habit Tracking System
+
+Person(user, "Web App User", "A person who wants to track and maintain habits")
+
+System(habit_system, "Habit Tracking System", "Allows users to create, track, and maintain habits while providing insights and notifications")
+
+System_Ext(email_system, "Email Service", "Sends email notifications to users")
+
+Rel(user, habit_system, "Uses", "HTTPS/REST")
+Rel(habit_system, email_system, "Sends notifications", "SMTP")
+
+SHOW_LEGEND()
+footer drawn with PlantUML v. %version() and C4-PlantUML v. C4Version()
+@enduml

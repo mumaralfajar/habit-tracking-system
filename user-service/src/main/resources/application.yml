@@ -1,0 +1,78 @@
+server:
+  port: ${SERVER_PORT:8092}  # HTTP port
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      group:
+        readiness:
+          include: grpc,db
+        liveness:
+          include: ping
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/habitsystem}
+    username: ${SPRING_DATASOURCE_USERNAME:habitsystem}
+    password: ${SPRING_DATASOURCE_PASSWORD:habitsystem}
+    hikari:
+      connectionTimeout: 30000
+      maximumPoolSize: 10
+      minimumIdle: 5
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      initialization-fail-timeout: 60000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+grpc:
+  server:
+    port: 9092
+    address: 0.0.0.0
+  client:
+    auth-service:
+      address: ${AUTH_SERVICE_HOST:auth-service}
+      port: ${AUTH_SERVICE_PORT:9092}
+      negotiationType: PLAINTEXT
+
+logging:
+  level:
+    net.devh.boot.grpc: DEBUG
+    io.grpc: DEBUG
+    com.habitsystem: DEBUG

@@ -1,0 +1,64 @@
+server:
+  port: ${SERVER_PORT:8091}  # HTTP port for auth-service
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/habitsystem}
+    username: ${SPRING_DATASOURCE_USERNAME:habitsystem}
+    password: ${SPRING_DATASOURCE_PASSWORD:habitsystem}
+    hikari:
+      connectionTimeout: 30000
+      maximumPoolSize: 10
+      minimumIdle: 5
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
+
+  security:
+    ignored-paths:
+      - /register
+      - /login
+    filter:
+      order: 10
+    basic:
+      enabled: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.habitsystem.auth: DEBUG
+    org.springframework.web: DEBUG
+    net.devh.boot.grpc: DEBUG
+    com.habitsystem: DEBUG
+
+grpc:
+  server:
+    port: 9091  # gRPC server port
+    address: 0.0.0.0
+    security:
+      enabled: false  # Disable SSL for development
+  client:
+    user-service:
+      address: static://user-service:9092
+      negotiationType: PLAINTEXT
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      keepAliveTime: 30s
+      keepAliveTimeout: 5s
+      idleTimeout: 300s
+      deadlineInSeconds: 5
+
+jwt:
+  secret: your-256-bit-secret
+  expiration: 86400000 # 24 hours in milliseconds
+  refresh:
+    expiration: 604800000 # 7 days
