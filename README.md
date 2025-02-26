@@ -5,13 +5,14 @@ A microservices-based habit tracking system built with Spring Boot and gRPC.
 ## Architecture
 
 [comment]: # ("image is based on percy/C4_Container Diagram Sample - bigbankplc-styles.puml")
-![Container diagram for Habit Tracking System](https://www.plantuml.com/plantuml/png/hLTFRzku4xthKqoD5ZyRIEBBxxH0WIQsswPm4bTssgD0IMERA4LgoP5TOx7VVKcHKVJ7Q-Imjt2OUVFUpEX9_cI8QQeA4RtZM_XmO9gpL622lxaXCnx5Y-Njvlx78hb_d2sVvulH909unsKcgXpXmmufQN8EJ5HuBcKw-tyoKv8ObwXloheQ2eDjg3rHQVwOJZKxtkmuxQkqCgWpcuMIRZ9LJ4l1f6DwRIWNFBMWroiNUdvOJWjc2FNPEZBdsoXQVttwcQmMyVhfCNbwtYpl7nVZIHJTvdcCOiDsun4p9vcDhk0zuM-QAQ7qn_UtSMpJFZyzRfBPq_8fjhV2OhTlEnThEWdyE6TcZ_dIdiUJIRk4gp3z3-ieejSw4N4I28r-c7Esqwo0hTBmbQMSOADPzelB7QnFXh28eXLge-JOTVeAHZynXTkoX6Tx7DdplIIq6MJWQ0S2j4SmTIAG0d9Oi7UuPcIhUyZaJbKoP_eqhcyI__yMwoo1qGJ-YW3WbVJuY6d2olALZU0P8wwa8nIZPNC5crE9wqppabnmfTM1vsXgVau9SCTxopAqlBhehEJ9ZX4UsSbctgxkuOi_EQ1rgHsrcL1LtedRg410IVe4fRBeTKkP4909ZlQeySyA3PaRssUP2pIWLKKsxGfOPMb92YAkG5jS4BpWuLhc81JB8MM2oSp6XfmjGc9b7NY6ZhGzmjeVMwplbA9wPiPOAZNkWGcUCxAdRpytGEeNIZD0TmrheRlHNq1_O9BjqFWsbrfjkGZ5IerRr2Wp7DO8gn2AX5suK6McDFhD0dfPc6qbCzT1gubEWmfI4T-67hSAFRR2RrNLXXfAqLWgtTOIky0bCL_GvZ6gsyJ4YNXchbphTXgD0Ozd_2AmRC_nW0NAL-5z1lFKBqIUlkp2_CwLMIb35dBzVLbp86NXUyi7EIDs1i_9jdXX-XVmV8FEeuGXMvWmtqiulTcUHmozTf2XpHSnGoS74olG6BR39DNs0T0EYgMs-iFtUlB-4lobVwoTFKEcYgAIeN4My-_6u1Q_QOm5uwAr10jtxkp0msO5xZw06fIvKred3bOi-fzxGiFpweAm5UfeeXX5iknwLiyCObLHc7DZGlKg_MW_-uxHBbxDV2ah0BLaegiHjECc3SIBzSPL3Y-5uCT-EOn3-hhPhDOMolrFSzirrWVs2qr3g4cQEcnF8jWha8AWncsNQv4ZMYkFkyeTdQ5o5-qK2Zg707xf1WW-_3Q8i6C3Z10VW7YfSwunenUPrwIkmv-z0NJbzvncIFypKhPl-Bj7g2dhlYtOpdniVsy4FGDOtzO1gWk_1TJfOyHIPX0q2h_IUrwQMaDtMuDlTUsfAV9jVXUwtdid1NiQkD0WhTUXnf1wjZFC73IbSPwUlGoIhVpRsY_mW9AkNHloxbZFz67WIAig5TpiGqSybdbjUEZraEb5hC3uF9gd_bmwY-ZOqPaXzalyoxjsNQKcqporbKbTqc0jxJn4trNNA7FJCylWhHR9Vz4l5ryMZ_Fn9DegHMujD3jA_xdwyji03ZVmuO3QM83nf7R7yCiXtDhZZvVhw9CjMXNY7m00)
+![Container diagram for Habit Tracking System](https://www.plantuml.com/plantuml/png/hLTHR-9647xthvX35nMa95IdFbKwwHBWxd8b2GLozsYjxG5MMNRTtJ49glhVExlU0CQKzg5lx2pppVVDZ3_C9qV2KhLMCFWb_IeoIHSVVfvRaJzBlUIFiwqZNATZtA3YuuVadLp0nKPOAJA5ARvAHwxRcOx6D_ExxwFqxc4mVXgEEhq4u9tKkQeAX8ibKhhBsGXLuQcKFbCO64r2QhJN9PDAtg5oU0Yr8YhTh_s-5I_NIqchAgiSsfopKDDrRjRzKWdj1LqvAfJC6FHguaDFz-F-MZX2UxAEBkGYIMPV7t-aaz5qzlYGFZxDntSFesulIMwAOefgBfRTZd1RdNSkuJtXAmsCClRZ-vlfbDC-FpxCqy7Z-77Ajugn6xU75pFQAlmu56w5nPZFtLxli8IlqFyVwnYYVPs492c4dNuOIh6qOWqBOo4i0BoD7-hX9ya4hJEwwpjz2PqVcC5DMS8J7pjyljE4d44ENdWWG2i45nA13937WfN7THsk7lVfrbIw47RR3JTf_Nt6EacWquC_4m3Oa-w-O9QAijopKJ8N98tsX6xqibA2gSwt9SvoAqlouOar6rcW2moz5f2U-KBaoCoQ-AAKwL8GleYj1vpSmPVwv85cfVNa1ifKHIFEKOM0ckmMIiFeeQb2ASYLH3vQ_AD2H-wQEwqBXGwigOZJBa5KJ4jJb749bd51oRMCrxe0PKG1cL12vnnhSsQ4b6LjP8wUD1zXLXyFMDyQGs5gpZ6LWBiHIXQ2-FJjnnp8FADsBNJVi0DqF_mpwFT2YoMwkisbDGkfOh7IuW8jwXpRDU8on29n6yvK6HYB49A0tbPcKUdSTv0rqRPLGHkIYzZZWq8F1-7_gkeGgYt5OcdiePPf29m1_uAS5wOWcFoMPEukVUkM5fs36i_LYo3obSGDhb7lXHyp66RrGXJPsouCRyDJO1mnvEptSU10Xk6FbWyAGU84dfVDU77wv_12WqwZn24pJ9plEPoZsPv6ZBtsaB7DPp5Z9riJMwDpFDqqi-Ov-DnlOl4imjZh6wXlmZCTt1boirvNEdQD0V_Q-TlebRgu5b8TRC38dniBS3-VWB-Fe0vruMM6nDP-9J_vnpC-h65C2sLUN395bOwRXdNa15DJKHpope727dq_VF3h4amShHQggGsivwGTJ4UpkQyOVmkY3TSRuRoch_FvPCPG_ZkxswQRtejdT3iYkwG-OqSIqLE134GLVgLyQvRJoI0edZOLUpfjnJwwBzGxbHWsh9qPmkTJuoArSqEyaSoIXj9YJczohiXSnO_DHX_9RDd8CTtFIFbgnpSy7nprwU7LGIpTnyFNYQYZ1HlQrqRruNy5ZVe4YKmuPDcgNjcLB5tGqDp6Q4fDxzaL-JQy7SJjQNAAtjEoc5RQKOTsRjFqb7PckzSxMpdoZbOooxy9Ve0Rr7Jbsr0qntgY3osxcLIPacuLEr9ZkNt3Ow_RJCzZHSQdqGBrfz9RGCDkJWpnkCG__93EgipbLcPScSmv3MnPfo6ENNE6kd17PXYzav7g5_RnwCleOSWlwWjZoA-55I-wVXjzU_M7pJLSRD0w1kZsWll5FmRnbe_VtwwJJrpK_otu6m00)
 
 ### Service Responsibilities
 
 - **API Gateway**: Routes and manages client requests (port 8080)
 - **Auth Service**: Handles authentication and authorization (ports 8091/9091)
 - **User Service**: Manages user profiles and data (ports 8092/9092)
+- **Notification Service**: Handles email and push notifications (ports 8093/9093)
 - **Habit Service**: Core habit tracking functionality (future implementation)
 
 ## Technologies
@@ -19,6 +20,7 @@ A microservices-based habit tracking system built with Spring Boot and gRPC.
 - Java 17
 - Spring Boot 3.x
 - gRPC
+- Kafka
 - PostgreSQL
 - Docker
 - Maven
@@ -42,12 +44,13 @@ docker-compose up --build
 
 ## Service Ports
 
-| Service      | HTTP Port | gRPC Port |
-|--------------|-----------|-----------|
-| API Gateway  | 8080      | -         |
-| Auth Service | 8091      | 9091      |
-| User Service | 8092      | 9092      |
-| PostgreSQL   | 5432      | -         |
+| Service             | HTTP Port | gRPC Port |
+|---------------------|-----------|-----------|
+| API Gateway         | 8080      | -         |
+| Auth Service        | 8091      | 9091      |
+| User Service        | 8092      | 9092      |
+| Notification Service| 8093      | 9093      |
+| PostgreSQL          | 5432      | -         |
 
 ## Project Structure
 
@@ -57,6 +60,7 @@ habit-tracking-system/
 ├── auth-service/         # Authentication service
 ├── habit-common/         # Shared code and protobuf definitions
 ├── user-service/         # User management service
+├── notification-service/ # Notification handling service
 └── docker-compose.yml    # Docker composition file
 ```
 
@@ -110,15 +114,3 @@ docker-compose up postgres
 ```bash
 mvn spring-boot:run
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License.

@@ -15,7 +15,7 @@ title Container Diagram for Habit Tracking System
 Person(user, "Web App User", "Interacts with the system to track habits")
 
 System_Boundary(habit_system, "Habit Tracking System") {
-    Container(web_app, "Web Application", "React, TypeScript", "Provides the user interface")
+    Container(web_app, "Web Application", "Angular, TypeScript", "Provides the user interface")
     Container(api_gateway, "API Gateway", "Spring Cloud Gateway", "Single entry point for all client requests. Handles routing, authentication, rate limiting, and load balancing")
     Container(auth_service, "Auth Service", "Spring Boot", "Issues and validates JWT tokens")
     Container(user_service, "User Service", "Spring Boot", "Manages user profiles and preferences")
@@ -26,22 +26,22 @@ System_Boundary(habit_system, "Habit Tracking System") {
     ContainerDb(user_db, "User DB", "PostgreSQL", "Stores user data")
     ContainerDb(habit_db, "Habit DB", "PostgreSQL", "Stores habit tracking data")
     ContainerDb(report_db, "Report DB", "PostgreSQL", "Stores reports")
-    Container(message_broker, "RabbitMQ", "Message broker for async communication")
+    Container(message_broker, "Kafka", "Message broker for async communication")
 }
 
 System_Ext(email_service, "Email Service", "SMTP server for sending email notifications")
 
 ' JWT validation flows
-Rel_L(api_gateway, auth_service, "Routes auth requests and Validates JWT", "gRPC")
+Rel_L(api_gateway, auth_service, "Routes auth requests and Validates JWT")
 
 ' External communication remains REST
 Rel(user, web_app, "Uses", "HTTPS")
 Rel(web_app, api_gateway, "Makes requests", "HTTPS/REST")
 
 ' Gateway to services using gRPC
-Rel_R(api_gateway, user_service, "Routes user requests", "gRPC")
-Rel_R(api_gateway, habit_service, "Routes habit requests", "gRPC")
-Rel_R(api_gateway, report_service, "Routes report requests", "gRPC")
+Rel_R(api_gateway, user_service, "Routes user requests")
+Rel_R(api_gateway, habit_service, "Routes habit requests")
+Rel_R(api_gateway, report_service, "Routes report requests")
 
 ' Direct service-to-service communication using gRPC
 Rel(report_service, habit_service, "Fetches habit data", "gRPC", $tags="sync/async")
