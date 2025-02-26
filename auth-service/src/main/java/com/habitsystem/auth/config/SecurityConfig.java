@@ -12,6 +12,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import lombok.RequiredArgsConstructor;
+
+import com.habitsystem.auth.filter.JwtAuthFilter;
 import com.habitsystem.auth.filter.RateLimitFilter;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Value("${rate.limit.max-requests:60}")
@@ -31,9 +35,11 @@ public class SecurityConfig {
     @Value("${rate.limit.window-minutes:1}")
     private int windowMinutes;
 
+    private final JwtAuthFilter jwtAuthFilter;
+    private final ObjectMapper objectMapper;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, 
-                                                 ObjectMapper objectMapper) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
@@ -45,10 +51,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/auth/verify").permitAll()
                 .requestMatchers("/api/v1/auth/refresh").permitAll()
+                .requestMatchers("/api/v1/auth/logout").authenticated()
                 .anyRequest().authenticated())
             .addFilterBefore(new RateLimitFilter(objectMapper, maxRequests, windowMinutes), 
-                           UsernamePasswordAuthenticationFilter.class);
-
+                UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
