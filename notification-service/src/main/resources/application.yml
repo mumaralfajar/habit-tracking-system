@@ -47,4 +47,4 @@ management:
       enabled: true
 
 app:
-  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}

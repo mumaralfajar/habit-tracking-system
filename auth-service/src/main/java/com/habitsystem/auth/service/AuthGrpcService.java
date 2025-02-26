@@ -7,7 +7,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

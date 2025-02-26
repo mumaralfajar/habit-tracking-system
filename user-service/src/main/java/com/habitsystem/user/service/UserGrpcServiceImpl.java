@@ -10,12 +10,15 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @GrpcService
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
+public class UserGrpcServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -111,6 +114,47 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
             log.error("Error fetching user by ID: {}", e.getMessage(), e);
             responseObserver.onError(Status.fromThrowable(e)
                 .withDescription(e.getMessage())
+                .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void verifyEmail(VerifyEmailRequest request, StreamObserver<UserResponse> responseObserver) {
+        try {
+            log.info("Updating user with ID: {}", request.getUserId());
+            
+            if (request.getUserId().isEmpty()) {
+                throw new GrpcException(Status.INVALID_ARGUMENT, "User ID cannot be empty");
+            }
+
+            User user = userRepository.findById(UUID.fromString(request.getUserId()))
+                .orElseThrow(() -> new GrpcException(Status.NOT_FOUND, 
+                    "User not found with ID: " + request.getUserId()));
+
+            log.debug("Found user: {}. Current email verified status: {}", 
+                user.getId(), user.getEmailVerified());
+
+            // Update email verified status if present in request
+            if (request.getEmailVerified() != user.getEmailVerified()) {
+                user.setEmailVerified(request.getEmailVerified());
+                log.debug("Updating email verified status to: {}", request.getEmailVerified());
+            }
+
+            User updatedUser = userRepository.save(user);
+            log.info("Successfully updated user: {}. New email verified status: {}", 
+                updatedUser.getId(), updatedUser.getEmailVerified());
+
+            UserResponse response = userMapper.toProto(updatedUser);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            
+        } catch (Exception e) {
+            String errorMessage = "Error updating user: " + e.getMessage();
+            log.error(errorMessage, e);
+            Status status = (e instanceof GrpcException) ? 
+                ((GrpcException) e).getStatus() : Status.INTERNAL;
+            responseObserver.onError(status
+                .withDescription(errorMessage)
                 .asRuntimeException());
         }
     }

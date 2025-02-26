@@ -7,6 +7,6 @@ public interface UserService {
     User createUser(User user);
     Optional<User> getUserById(String id);
     Optional<User> getUserByUsername(String username);
-    User updateUser(User user);
+    User verifyEmail(User user);
     void deleteUser(String id);
 }

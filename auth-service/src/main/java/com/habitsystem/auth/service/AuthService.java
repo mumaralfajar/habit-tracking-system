@@ -79,7 +79,6 @@ public class AuthService {
                 .userId(userResponse.getUserId())
                 .username(userResponse.getUsername())
                 .email(userResponse.getEmail())
-                .verificationToken(token)
                 .build();
         } catch (Exception e) {
             log.error("Registration failed: {}", e.getMessage(), e);
@@ -107,23 +106,33 @@ public class AuthService {
             throw new AuthenticationException("This verification link has already been used.");
         }
 
+        UUID userId = verificationToken.getUserId();
+
         try {
-            // Update user's verified status via gRPC
-            UpdateUserRequest updateRequest = UpdateUserRequest.newBuilder()
-                .setUserId(verificationToken.getUserId().toString())  // Convert UUID to String
+            log.debug("Attempting to update user {} verification status via gRPC", userId);
+            
+            // Update user's verified status via gRPC with timeout
+            VerifyEmailRequest verifyEmailRequest = VerifyEmailRequest.newBuilder()
+                .setUserId(userId.toString())
                 .setEmailVerified(true)
                 .build();
 
-            userService.updateUser(updateRequest);
-            log.info("User email verified successfully: {}", verificationToken.getUserId());
+            log.info("Verify email request: {}", verifyEmailRequest);
+
+            UserResponse response = userService.withDeadlineAfter(5, TimeUnit.SECONDS)
+                .verifyEmail(verifyEmailRequest);
+                
+            log.info("Successfully verified email for user: {} with response: {}", 
+                userId, response.getEmailVerified());
 
             // Mark token as used
             verificationToken.setUsedAt(LocalDateTime.now());
             verificationTokenRepository.save(verificationToken);
             
         } catch (Exception e) {
-            log.error("Failed to verify email: {}", e.getMessage(), e);
-            throw new AuthenticationException("Failed to verify email. Please try again later.");
+            log.error("Failed to verify email for user {}: {}", userId, e.getMessage(), e);
+            throw new AuthenticationException("Failed to verify email: " + 
+                (e.getMessage() != null ? e.getMessage() : "Unknown error"));
         }
     }
 
