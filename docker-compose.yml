@@ -42,6 +42,7 @@ services:
       SERVER_PORT: 8091
       GRPC_SERVER_PORT: 9091
       GRPC_CLIENT_USER-SERVICE_NEGOTIATION_TYPE: PLAINTEXT
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
     expose:
       - "9091"
       - "8091"
@@ -103,6 +104,67 @@ services:
       - "8080:8080"
     networks:
       - habit-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - habit-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "9093:9093"  # Changed from 9092 to avoid conflict
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:29092  # Updated port
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092  # Updated port
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - habit-network
+
+  notification-service:
+    build: ./notification-service
+    depends_on:
+      kafka:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093  # Updated port
+      SPRING_KAFKA_CONSUMER_GROUP_ID: notification-service
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: your@email.com
+      SPRING_MAIL_PASSWORD: your 16 digits app password
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+      SERVER_PORT: 8084
+      MANAGEMENT_HEALTH_MAIL_ENABLED: true
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+    ports:
+      - "8084:8084"
+    networks:
+      - habit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:

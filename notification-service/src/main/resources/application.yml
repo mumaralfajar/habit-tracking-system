@@ -1,0 +1,50 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: notification-service
+    
+  kafka:
+    consumer:
+      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}  # Updated to use external port
+      group-id: notification-service
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.habitsystem.notification.event,com.habitsystem.auth.event"
+        spring.json.value.default.type: "com.habitsystem.notification.event.UserRegisteredEvent"
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your@email.com
+    password: your 16 digits app password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: true
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}

@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8091}  # HTTP port for auth-service
+  port: ${SERVER_PORT:8091}
 
 spring:
   application:
@@ -10,27 +10,42 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:habitsystem}
     hikari:
       connectionTimeout: 30000
-      maximumPoolSize: 10
-      minimumIdle: 5
+      maximumPoolSize: 5
+      minimumIdle: 2
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
     validate-on-migrate: true
     clean-disabled: true
-
-  security:
-    ignored-paths:
-      - /register
-      - /login
-    filter:
-      order: 10
-    basic:
-      enabled: false
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      properties:
+        delivery.timeout.ms: 120000
+        retry.backoff.ms: 1000
+        max.block.ms: 60000
+        request.timeout.ms: 30000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        reconnect.backoff.ms: 1000
+        reconnect.backoff.max.ms: 10000
+        acks: all
+        batch.size: 16384
+        linger.ms: 100
+        buffer.memory: 33554432
+        spring.json.add.type.headers: true
+        spring.json.trusted.packages: "com.habitsystem.auth.event"
 
 logging:
   level:
@@ -42,13 +57,13 @@ logging:
 
 grpc:
   server:
-    port: 9091  # gRPC server port
+    port: 9091
     address: 0.0.0.0
     security:
-      enabled: false  # Disable SSL for development
+      enabled: false
   client:
     user-service:
-      address: static://user-service:9092
+      address: static://${USER_SERVICE_HOST:localhost}:${USER_SERVICE_PORT:9092}
       negotiationType: PLAINTEXT
       enableKeepAlive: true
       keepAliveWithoutCalls: true
@@ -58,7 +73,25 @@ grpc:
       deadlineInSeconds: 5
 
 jwt:
-  secret: your-256-bit-secret
-  expiration: 86400000 # 24 hours in milliseconds
-  refresh:
-    expiration: 604800000 # 7 days
+  secret: ${JWT_SECRET:my-super-secret-key-that-should-be-very-long-and-secure}
+  access-token:
+    expiration: 60
+  refresh-token:
+    expiration: 10080
+
+verification:
+  token:
+    expiration: 1440
+
+rate:
+  limit:
+    max-requests: 60
+    window-minutes: 1
+
+security:
+  public-paths:
+    - /api/v1/auth/register
+    - /api/v1/auth/login
+    - /api/v1/auth/verify
+    - /api/v1/auth/refresh
+    - /actuator/**

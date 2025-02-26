@@ -5,25 +5,30 @@ option java_package = "com.habitsystem.proto.auth";
 option java_multiple_files = true;
 
 service AuthService {
-  rpc Login (LoginRequest) returns (LoginResponse) {}
-  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
+  rpc Authenticate (AuthRequest) returns (AuthResponse) {}
+  rpc ValidateAuth (ValidateAuthRequest) returns (ValidateAuthResponse) {}
 }
 
-message LoginRequest {
+message AuthRequest {
   string username = 1;
   string password = 2;
 }
 
-message LoginResponse {
+message AuthResponse {
   string token = 1;
   string refresh_token = 2;
+  string user_id = 3;
+  string username = 4;
+  int64 expires_in = 5;
+  string token_type = 6;
 }
 
-message ValidateTokenRequest {
+message ValidateAuthRequest {
   string token = 1;
 }
 
-message ValidateTokenResponse {
+message ValidateAuthResponse {
   bool valid = 1;
   string user_id = 2;
+  string username = 3;
 }

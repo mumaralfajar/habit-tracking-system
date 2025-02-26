@@ -18,12 +18,10 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
     
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    
-    @GrpcClient("user-service")
     private UserServiceGrpc.UserServiceBlockingStub userService;
 
     @Override
-    public void login(LoginRequest request, StreamObserver<LoginResponse> responseObserver) {
+    public void authenticate(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
         try {
             log.info("Processing login request for user: {}", request.getUsername());
             
@@ -46,10 +44,10 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
             }
 
             // Generate tokens
-            String accessToken = jwtService.generateToken(user.getUsername(), user.getUserId());
-            String refreshToken = jwtService.generateRefreshToken(user.getUserId());
+            String accessToken = jwtService.generateAccessToken(user.getUserId(), user.getUsername());
+            String refreshToken = jwtService.generateRefreshToken(user.getUserId(), user.getUsername());
             
-            LoginResponse response = LoginResponse.newBuilder()
+            AuthResponse response = AuthResponse.newBuilder()
                 .setToken(accessToken)
                 .setRefreshToken(refreshToken)
                 .build();
@@ -68,15 +66,17 @@ public class AuthGrpcService extends AuthServiceGrpc.AuthServiceImplBase {
     }
 
     @Override
-    public void validateToken(ValidateTokenRequest request, StreamObserver<ValidateTokenResponse> responseObserver) {
+    public void validateAuth(ValidateAuthRequest request, StreamObserver<ValidateAuthResponse> responseObserver) {
         try {
             log.info("Validating token");
-            boolean isValid = jwtService.validateToken(request.getToken());
+            boolean isValid = jwtService.isTokenValid(request.getToken());
             String userId = isValid ? jwtService.getUserIdFromToken(request.getToken()) : "";
+            String username = isValid ? jwtService.getUsernameFromToken(request.getToken()) : "";
             
-            ValidateTokenResponse response = ValidateTokenResponse.newBuilder()
+            ValidateAuthResponse response = ValidateAuthResponse.newBuilder()
                 .setValid(isValid)
                 .setUserId(userId)
+                .setUsername(username)
                 .build();
                 
             responseObserver.onNext(response);

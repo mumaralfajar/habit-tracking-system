@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.UUID;
-
 @GrpcService
 @RequiredArgsConstructor
 @Slf4j
@@ -63,23 +61,54 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
                     "Username already exists: " + request.getUsername());
             }
 
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new GrpcException(Status.ALREADY_EXISTS, 
+                    "Email already exists: " + request.getEmail());
+            }
+
+            // Create user with encoded password
             User user = userMapper.toEntity(request);
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            log.debug("Password encoded successfully for user: {}", request.getUsername());
+            user.setPassword(encodedPassword);
+            user.setEmailVerified(false);
             
             User savedUser = userRepository.save(user);
             
-            UserResponse response = UserResponse.newBuilder()
-                .setUserId(UUID.randomUUID().toString())
-                .setUsername(savedUser.getUsername())
-                .setEmail(savedUser.getEmail())
-                .build();
-
+            UserResponse response = mapToUserResponse(savedUser);
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             
             log.info("Successfully created user: {}", savedUser.getUsername());
         } catch (Exception e) {
             log.error("Error creating user: {}", e.getMessage(), e);
+            responseObserver.onError(Status.fromThrowable(e)
+                .withDescription(e.getMessage())
+                .asRuntimeException());
+        }
+    }
+
+    @Override
+    public void getUserById(GetUserByIdRequest request, 
+                          StreamObserver<UserResponse> responseObserver) {
+        try {
+            log.info("Fetching user by ID: {}", request.getUserId());
+            
+            if (request.getUserId().isEmpty()) {
+                throw new GrpcException(Status.INVALID_ARGUMENT, "User ID cannot be empty");
+            }
+
+            User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new GrpcException(Status.NOT_FOUND, 
+                    "User not found with ID: " + request.getUserId()));
+
+            UserResponse response = mapToUserResponse(user);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            
+            log.info("Successfully fetched user with ID: {}", user.getId());
+        } catch (Exception e) {
+            log.error("Error fetching user by ID: {}", e.getMessage(), e);
             responseObserver.onError(Status.fromThrowable(e)
                 .withDescription(e.getMessage())
                 .asRuntimeException());

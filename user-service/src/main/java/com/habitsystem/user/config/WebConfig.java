@@ -21,13 +21,21 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
             .allowedOrigins("*")
             .allowedMethods("*")
-            .allowedHeaders("*");
+            .allowedHeaders("*")
+            .exposedHeaders("Authorization");
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
-                .excludePathPatterns("/api/v1/health/**") // Add paths to exclude from auth
-                .addPathPatterns("/api/v1/**");           // Add paths to protect
+                .excludePathPatterns(
+                    "/api/v1/health/**",          // Health check endpoints
+                    "/api/v1/public/**",          // Public endpoints
+                    "/actuator/**",               // Actuator endpoints
+                    "/error",                     // Error pages
+                    "/swagger-ui/**",             // Swagger UI
+                    "/v3/api-docs/**"            // OpenAPI docs
+                )
+                .addPathPatterns("/api/v1/**");   // Protect all other API endpoints
     }
 }

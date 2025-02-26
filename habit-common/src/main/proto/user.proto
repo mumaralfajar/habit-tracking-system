@@ -9,6 +9,7 @@ service UserService {
   rpc GetUserByUsername (GetUserByUsernameRequest) returns (UserResponse) {}
   rpc CreateUser (CreateUserRequest) returns (UserResponse) {}
   rpc UpdateUser (UpdateUserRequest) returns (UserResponse) {}
+  rpc GetUserById (GetUserByIdRequest) returns (UserResponse) {}
 }
 
 message GetUserRequest {
@@ -28,7 +29,12 @@ message CreateUserRequest {
 message UpdateUserRequest {
   string user_id = 1;
   string email = 2;
-  map<string, string> preferences = 3;
+  bool email_verified = 3;
+  map<string, string> preferences = 4;
+}
+
+message GetUserByIdRequest {
+  string userId = 1;
 }
 
 message UserResponse {
@@ -36,4 +42,5 @@ message UserResponse {
   string username = 2;
   string email = 3;
   string password = 4;
+  bool email_verified = 5;
 }

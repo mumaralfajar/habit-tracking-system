@@ -21,6 +21,8 @@ public class UserMapper {
             .setUserId(user.getId().toString())
             .setUsername(user.getUsername())
             .setEmail(user.getEmail())
+            .setEmailVerified(user.getEmailVerified())
+            .setPassword(user.getPassword())
             .build();
     }
 }
