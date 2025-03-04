@@ -6,7 +6,10 @@ services:
     environment:
       POSTGRES_USER: habitsystem
       POSTGRES_PASSWORD: habitsystem
-      POSTGRES_DB: habitsystem
+      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker-scripts/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
     ports:
       - "5432:5432"
     healthcheck:
@@ -27,7 +30,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/habitsystem
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
       SPRING_DATASOURCE_USERNAME: habitsystem
       SPRING_DATASOURCE_PASSWORD: habitsystem
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
@@ -59,7 +62,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/habitsystem
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_db
       SPRING_DATASOURCE_USERNAME: habitsystem
       SPRING_DATASOURCE_PASSWORD: habitsystem
       GRPC_SERVER_ADDRESS: 0.0.0.0

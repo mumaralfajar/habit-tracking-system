@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/habitsystem
+    url: jdbc:postgresql://postgres:5432/user_db
     username: habitsystem
     password: habitsystem
     driver-class-name: org.postgresql.Driver
