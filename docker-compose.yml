@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: habitsystem
       POSTGRES_PASSWORD: habitsystem
-      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db
+      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db,habit_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker-scripts/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
@@ -18,40 +18,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    networks:
-      - habit-network
-
-  auth-service:
-    build: ./auth-service
-    depends_on:
-      postgres:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: habitsystem
-      SPRING_DATASOURCE_PASSWORD: habitsystem
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
-      SPRING_FLYWAY_ENABLED: 'true'
-      GRPC_CLIENT_USER-SERVICE_ADDRESS: static://user-service:9092
-      USER_SERVICE_HOST: user-service
-      USER_SERVICE_PORT: 8092
-      SPRING_FLYWAY_REPAIR_ON_MIGRATE: 'true'
-      SPRING_FLYWAY_CLEAN_ON_VALIDATION_ERROR: 'true'
-      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: 'false'
-      SERVER_PORT: 8091
-      GRPC_SERVER_PORT: 9091
-      GRPC_CLIENT_USER-SERVICE_NEGOTIATION_TYPE: PLAINTEXT
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
-    expose:
-      - "9091"
-      - "8091"
-    ports:
-      - "8091:8091"
-      - "9091:9091"
     networks:
       - habit-network
 
@@ -91,18 +57,102 @@ services:
       retries: 3
       start_period: 40s
 
+  auth-service:
+    build: ./auth-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: habitsystem
+      SPRING_DATASOURCE_PASSWORD: habitsystem
+      SPRING_FLYWAY_ENABLED: 'true'
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
+      GRPC_CLIENT_USER-SERVICE_ADDRESS: static://user-service:9092
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_PORT: 8092
+      SERVER_PORT: 8091
+      JAVA_TOOL_OPTIONS: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=70.0 -Dspring.output.ansi.enabled=ALWAYS"
+      GRPC_SERVER_PORT: 9091
+      GRPC_CLIENT_USER-SERVICE_NEGOTIATION_TYPE: PLAINTEXT
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      MANAGEMENT_HEALTH_READINESS_STATE_ENABLED: 'true'
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: 'true'
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "ALWAYS"
+      MANAGEMENT_HEALTH_DEFAULTS_ENABLED: "true"
+      MANAGEMENT_HEALTH_READINESSTATE_ENABLED: "true"
+    expose:
+      - "9091"
+      - "8091"
+    ports:
+      - "8091:8091"
+      - "9091:9091"
+    networks:
+      - habit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  habit-service:
+    build: ./habit-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/habit_db
+      SPRING_DATASOURCE_USERNAME: habitsystem
+      SPRING_DATASOURCE_PASSWORD: habitsystem
+      GRPC_SERVER_ADDRESS: 0.0.0.0
+      GRPC_SERVER_PORT: 9095
+      SPRING_FLYWAY_ENABLED: 'true'
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
+      SERVER_PORT: 8095
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      JAVA_TOOL_OPTIONS: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=70.0 -Dspring.output.ansi.enabled=ALWAYS"
+      MANAGEMENT_HEALTH_READINESS_STATE_ENABLED: 'true'
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: 'true'
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "ALWAYS"
+      MANAGEMENT_HEALTH_DEFAULTS_ENABLED: "true"
+      MANAGEMENT_HEALTH_READINESSTATE_ENABLED: "true"
+    expose:
+      - "9095"
+      - "8095"
+    ports:
+      - "8095:8095"
+      - "9095:9095"
+    networks:
+      - habit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8095/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   api-gateway:
     build: ./api-gateway
     depends_on:
       auth-service:
-        condition: service_started
+        condition: service_healthy
       user-service:
-        condition: service_started
+        condition: service_healthy
+      habit-service:
+        condition: service_healthy
     environment:
       AUTH_SERVICE_HOST: auth-service
       AUTH_SERVICE_PORT: 8091
       USER_SERVICE_HOST: user-service
       USER_SERVICE_PORT: 8092
+      HABIT_SERVICE_HOST: habit-service
+      HABIT_SERVICE_PORT: 8095
+      SERVER_PORT: 8080
     ports:
       - "8080:8080"
     networks:
@@ -124,13 +174,13 @@ services:
       - zookeeper
     ports:
       - "29092:29092"
-      - "9093:9093"  # Changed from 9092 to avoid conflict
+      - "9093:9093"  # Changed from 9092 to avoid conflict with user grpc service
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:29092  # Updated port
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092  # Updated port
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
@@ -145,13 +195,13 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093  # Updated port
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
       SPRING_KAFKA_CONSUMER_GROUP_ID: notification-service
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: your@email.com
-      SPRING_MAIL_PASSWORD: your 16 digits app password
+      SPRING_MAIL_USERNAME: umar.fajar14@gmail.com
+      SPRING_MAIL_PASSWORD: iger pjcw mepw yrhy
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
       SERVER_PORT: 8084

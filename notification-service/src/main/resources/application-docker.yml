@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: kafka:9093
     consumer:
       group-id: notification-service
       auto-offset-reset: earliest

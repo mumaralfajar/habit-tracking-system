@@ -18,35 +18,23 @@ spring:
             - Path=/api/v1/auth/**
           filters:
             - PreserveHostHeader
-        - id: user_service
-          uri: grpc://user-service:9092  # Change from HTTP to gRPC
+        - id: user-service
+          uri: http://${USER_SERVICE_HOST:localhost}:${USER_SERVICE_PORT:8092}
           predicates:
             - Path=/api/users/**
           filters:
-            - StripPrefix=2
-            - Authentication
-            - name: GrpcRouting
-              args:
-                serviceClass: com.habitsystem.proto.user.UserServiceGrpc
-                requestClass: com.habitsystem.proto.user.UserRequest
-                responseClass: com.habitsystem.proto.user.UserResponse
+            - PreserveHostHeader
         - id: habit-service
-          uri: grpc://localhost:9093
+          uri: http://${HABIT_SERVICE_HOST:localhost}:${HABIT_SERVICE_PORT:8095}
           predicates:
             - Path=/api/habits/**
           filters:
-            - StripPrefix=2
-            - Authentication
-            - name: GrpcRouting
-              args:
-                serviceClass: com.habitsystem.proto.habit.HabitServiceGrpc
-                requestClass: com.habitsystem.proto.habit.HabitRequest
-                responseClass: com.habitsystem.proto.habit.HabitResponse
+            - PreserveHostHeader
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:4200"
+              - "http://localhost:4200" # frontend app
             allowedMethods:
               - GET
               - POST
@@ -61,18 +49,6 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-
-grpc:
-  client:
-    auth-service:
-      address: static://auth-service:9091  # gRPC port for auth-service
-      negotiationType: PLAINTEXT
-    user-service:
-      address: static://user-service:9092  # gRPC port for user-service
-      negotiationType: PLAINTEXT
-    habit-service:
-      address: static://localhost:9093
-      negotiationType: PLAINTEXT
 
 logging:
   level:
