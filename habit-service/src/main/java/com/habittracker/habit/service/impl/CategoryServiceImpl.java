@@ -27,7 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public Optional<Category> getCategoryById(Long id) {
+    public Optional<Category> getCategoryById(String id) {
         return categoryRepository.findById(id);
     }
     
@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category createCategory(Category category) {
         // Check if category with same name exists for this user
         Optional<Category> existing = categoryRepository.findByUserIdAndName(
-                category.getUserId(), category.getName());
+                category.getUserId().toString(), category.getName());
         if (existing.isPresent()) {
             throw new IllegalArgumentException("Category with name " + category.getName() + 
                     " already exists for this user");
@@ -44,14 +44,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public Category updateCategory(Long id, Category categoryDetails) {
+    public Category updateCategory(String id, Category categoryDetails) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
         
         // Check if name is being changed and if new name already exists
         if (!category.getName().equals(categoryDetails.getName())) {
             Optional<Category> existingWithName = categoryRepository.findByUserIdAndName(
-                    category.getUserId(), categoryDetails.getName());
+                    category.getUserId().toString(), categoryDetails.getName());
             if (existingWithName.isPresent()) {
                 throw new IllegalArgumentException("Category with name " + categoryDetails.getName() + 
                         " already exists for this user");
@@ -66,7 +66,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public void deleteCategory(Long id) {
+    public void deleteCategory(String id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
         
@@ -85,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public Long countHabitsInCategory(Long categoryId) {
+    public Long countHabitsInCategory(String categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryId));
         return (long) category.getHabits().size();

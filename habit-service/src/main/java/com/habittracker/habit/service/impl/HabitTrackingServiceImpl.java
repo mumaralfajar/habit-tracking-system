@@ -30,7 +30,7 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     private final ScheduleValidationService scheduleValidationService;
     
     @Override
-    public HabitTrackingRecord trackHabitCompletion(Long habitId, HabitTrackingRecord record) {
+    public HabitTrackingRecord trackHabitCompletion(String habitId, HabitTrackingRecord record) {
         Habit habit = habitRepository.findById(habitId)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + habitId));
         
@@ -50,12 +50,12 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     }
     
     @Override
-    public List<HabitTrackingRecord> getTrackingRecordsByHabitId(Long habitId) {
+    public List<HabitTrackingRecord> getTrackingRecordsByHabitId(String habitId) {
         return trackingRecordRepository.findByHabitId(habitId);
     }
     
     @Override
-    public List<HabitTrackingRecord> getTrackingRecordsByDateRange(Long habitId, LocalDateTime start, LocalDateTime end) {
+    public List<HabitTrackingRecord> getTrackingRecordsByDateRange(String habitId, LocalDateTime start, LocalDateTime end) {
         return trackingRecordRepository.findByHabitIdAndCompletedAtBetween(habitId, start, end);
     }
     
@@ -65,17 +65,17 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     }
     
     @Override
-    public Optional<HabitTrackingRecord> getMostRecentCompletion(Long habitId) {
+    public Optional<HabitTrackingRecord> getMostRecentCompletion(String habitId) {
         return trackingRecordRepository.findMostRecentByHabitId(habitId);
     }
     
     @Override
-    public Map<Long, Integer> getHabitCompletionCountsForUser(String userId, LocalDateTime start, LocalDateTime end) {
+    public Map<String, Integer> getHabitCompletionCountsForUser(String userId, LocalDateTime start, LocalDateTime end) {
         List<Object[]> results = trackingRecordRepository.getCompletionStatsByUserIdBetweenDates(userId, start, end);
-        Map<Long, Integer> completionCounts = new HashMap<>();
+        Map<String, Integer> completionCounts = new HashMap<>();
         
         for (Object[] row : results) {
-            Long habitId = (Long) row[0];
+            String habitId = (String) row[0];
             Long count = (Long) row[1];
             completionCounts.put(habitId, count.intValue());
         }
@@ -84,17 +84,17 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     }
     
     @Override
-    public Long countCompletionsInRange(Long habitId, LocalDateTime start, LocalDateTime end) {
+    public Long countCompletionsInRange(String habitId, LocalDateTime start, LocalDateTime end) {
         return trackingRecordRepository.countCompletionsInRange(habitId, start, end);
     }
     
     @Override
-    public Map<Long, Double> getHabitDifficultyRatings(String userId, LocalDateTime start, LocalDateTime end) {
+    public Map<String, Double> getHabitDifficultyRatings(String userId, LocalDateTime start, LocalDateTime end) {
         List<Object[]> results = trackingRecordRepository.getCompletionStatsByUserIdBetweenDates(userId, start, end);
-        Map<Long, Double> difficultyRatings = new HashMap<>();
+        Map<String, Double> difficultyRatings = new HashMap<>();
         
         for (Object[] row : results) {
-            Long habitId = (Long) row[0];
+            String habitId = (String) row[0];
             Double avgDifficulty = (Double) row[2];
             difficultyRatings.put(habitId, avgDifficulty);
         }
@@ -152,7 +152,7 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
         
         // Get actual completions
         long actualCompletions = trackingRecordRepository.countCompletionsInRange(
-                habit.getId(), startOfTracking, now);
+                habit.getId().toString(), startOfTracking, now);
         
         // Calculate and set completion rate
         double completionRate = (totalExpectedCompletions > 0)

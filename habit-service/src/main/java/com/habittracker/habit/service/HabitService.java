@@ -10,15 +10,15 @@ public interface HabitService {
     
     List<Habit> getAllHabitsByUserId(String userId);
     
-    List<Habit> getHabitsByUserIdAndCategory(String userId, Long categoryId);
+    List<Habit> getHabitsByUserIdAndCategory(String userId, String categoryId);
     
-    Optional<Habit> getHabitById(Long id);
+    Optional<Habit> getHabitById(String id);
     
     Habit createHabit(Habit habit);
     
-    Habit updateHabit(Long id, Habit habitDetails);
+    Habit updateHabit(String id, Habit habitDetails);
     
-    void deleteHabit(Long id);
+    void deleteHabit(String id);
     
     List<Habit> getDueHabits(String userId, LocalDateTime currentTime);
     

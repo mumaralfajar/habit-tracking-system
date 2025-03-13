@@ -4,19 +4,18 @@ import com.habittracker.habit.model.HabitReminder;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface HabitReminderService {
     
-    List<HabitReminder> getRemindersByHabitId(Long habitId);
+    List<HabitReminder> getRemindersByHabitId(String habitId);
     
     HabitReminder createReminder(HabitReminder reminder);
     
-    HabitReminder updateReminder(Long id, HabitReminder reminderDetails);
+    HabitReminder updateReminder(String id, HabitReminder reminderDetails);
     
-    void deleteReminder(Long id);
+    void deleteReminder(String id);
     
-    void toggleReminderStatus(Long id, boolean enabled);
+    void toggleReminderStatus(String id, boolean enabled);
     
     List<HabitReminder> getActiveRemindersByUserId(String userId);
     

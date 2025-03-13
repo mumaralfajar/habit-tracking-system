@@ -22,13 +22,13 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     private final HabitRepository habitRepository;
     
     @Override
-    public List<HabitReminder> getRemindersByHabitId(Long habitId) {
+    public List<HabitReminder> getRemindersByHabitId(String habitId) {
         return reminderRepository.findByHabitId(habitId);
     }
     
     @Override
     public HabitReminder createReminder(HabitReminder reminder) {
-        Habit habit = habitRepository.findById(reminder.getHabit().getId())
+        Habit habit = habitRepository.findById(String.valueOf(reminder.getHabit().getId()))
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + 
                         reminder.getHabit().getId()));
         
@@ -37,7 +37,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public HabitReminder updateReminder(Long id, HabitReminder reminderDetails) {
+    public HabitReminder updateReminder(String id, HabitReminder reminderDetails) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         
@@ -51,7 +51,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public void deleteReminder(Long id) {
+    public void deleteReminder(String id) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         
@@ -59,7 +59,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public void toggleReminderStatus(Long id, boolean enabled) {
+    public void toggleReminderStatus(String id, boolean enabled) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         

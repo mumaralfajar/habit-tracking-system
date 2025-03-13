@@ -201,7 +201,7 @@ services:
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
       SPRING_MAIL_USERNAME: umar.fajar14@gmail.com
-      SPRING_MAIL_PASSWORD: iger pjcw mepw yrhy
+      SPRING_MAIL_PASSWORD: ysis rmkl pnrp vkab
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
       SERVER_PORT: 8084

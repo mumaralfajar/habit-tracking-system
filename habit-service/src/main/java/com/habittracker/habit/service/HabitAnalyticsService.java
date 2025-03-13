@@ -8,7 +8,7 @@ public interface HabitAnalyticsService {
     
     Map<String, Object> getUserStats(String userId);
     
-    Map<String, Object> getHabitStats(Long habitId);
+    Map<String, Object> getHabitStats(String habitId);
     
     Map<String, Object> getUserCompletionTrends(String userId, LocalDateTime start, LocalDateTime end);
     

@@ -145,7 +145,7 @@ public class ScheduleValidationServiceImpl implements ScheduleValidationService 
     }
     
     @Override
-    public boolean hasMetFrequencyRequirements(Long habitId, LocalDateTime start, LocalDateTime end) {
+    public boolean hasMetFrequencyRequirements(String habitId, LocalDateTime start, LocalDateTime end) {
         Long completions = trackingRecordRepository.countCompletionsInRange(habitId, start, end);
         Habit habit = trackingRecordRepository.findByHabitId(habitId).get(0).getHabit();
         int required = calculateRequiredCompletionsForPeriod(habit, start, end);
@@ -164,7 +164,7 @@ public class ScheduleValidationServiceImpl implements ScheduleValidationService 
             LocalDateTime endOfWeek = startOfWeek.plusDays(6).withHour(23).withMinute(59).withSecond(59);
             
             long completionsThisWeek = trackingRecordRepository.countCompletionsInRange(
-                    habit.getId(), startOfWeek, endOfWeek);
+                    habit.getId().toString(), startOfWeek, endOfWeek);
             
             if (completionsThisWeek < timesPerWeek) {
                 // Not complete for this week yet, due tomorrow
@@ -192,7 +192,7 @@ public class ScheduleValidationServiceImpl implements ScheduleValidationService 
                     .withHour(23).withMinute(59).withSecond(59);
             
             long completionsThisMonth = trackingRecordRepository.countCompletionsInRange(
-                    habit.getId(), startOfMonth, endOfMonth);
+                    habit.getId().toString(), startOfMonth, endOfMonth);
             
             if (completionsThisMonth < timesPerMonth) {
                 // Not complete for this month yet, due tomorrow

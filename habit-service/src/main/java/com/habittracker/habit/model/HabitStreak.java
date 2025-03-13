@@ -4,6 +4,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "habit_streaks")
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public class HabitStreak {
     
     @Id
-    private Long habitId;
+    private UUID habitId;
     
     @OneToOne
     @MapsId

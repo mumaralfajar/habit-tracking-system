@@ -9,15 +9,15 @@ public interface CategoryService {
     
     List<Category> getAllCategoriesByUserId(String userId);
     
-    Optional<Category> getCategoryById(Long id);
+    Optional<Category> getCategoryById(String id);
     
     Category createCategory(Category category);
     
-    Category updateCategory(Long id, Category categoryDetails);
+    Category updateCategory(String id, Category categoryDetails);
     
-    void deleteCategory(Long id);
+    void deleteCategory(String id);
     
     Optional<Category> getCategoryByUserIdAndName(String userId, String name);
     
-    Long countHabitsInCategory(Long categoryId);
+    Long countHabitsInCategory(String categoryId);
 }

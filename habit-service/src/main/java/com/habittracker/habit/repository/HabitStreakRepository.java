@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface HabitStreakRepository extends JpaRepository<HabitStreak, Long> {
+public interface HabitStreakRepository extends JpaRepository<HabitStreak, String> {
     
-    Optional<HabitStreak> findByHabitId(Long habitId);
+    Optional<HabitStreak> findByHabitId(String habitId);
     
     @Query("SELECT s FROM HabitStreak s JOIN s.habit h WHERE h.userId = :userId")
     List<HabitStreak> findByUserId(String userId);

@@ -20,7 +20,7 @@ public class HabitStreakServiceImpl implements HabitStreakService {
     private final HabitStreakRepository streakRepository;
     
     @Override
-    public Optional<HabitStreak> getStreakByHabitId(Long habitId) {
+    public Optional<HabitStreak> getStreakByHabitId(String habitId) {
         return streakRepository.findByHabitId(habitId);
     }
     

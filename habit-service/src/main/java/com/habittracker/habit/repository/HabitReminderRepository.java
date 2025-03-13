@@ -9,9 +9,9 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface HabitReminderRepository extends JpaRepository<HabitReminder, Long> {
+public interface HabitReminderRepository extends JpaRepository<HabitReminder, String> {
     
-    List<HabitReminder> findByHabitId(Long habitId);
+    List<HabitReminder> findByHabitId(String habitId);
     
     @Query("SELECT r FROM HabitReminder r JOIN r.habit h WHERE h.userId = :userId AND r.enabled = true")
     List<HabitReminder> findActiveRemindersByUserId(String userId);

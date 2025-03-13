@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface HabitStreakService {
     
-    Optional<HabitStreak> getStreakByHabitId(Long habitId);
+    Optional<HabitStreak> getStreakByHabitId(String habitId);
     
     List<HabitStreak> getStreaksByUserId(String userId);
     

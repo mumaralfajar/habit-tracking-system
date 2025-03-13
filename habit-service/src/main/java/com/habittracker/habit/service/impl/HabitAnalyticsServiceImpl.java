@@ -61,7 +61,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getHabitStats(Long habitId) {
+    public Map<String, Object> getHabitStats(String habitId) {
         Map<String, Object> stats = new HashMap<>();
         
         LocalDateTime now = LocalDateTime.now();
@@ -205,7 +205,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
             String categoryName = habit.getCategory() != null ? habit.getCategory().getName() : "Uncategorized";
             
             Long completions = trackingRecordRepository.countCompletionsInRange(
-                    habit.getId(), thirtyDaysAgo, LocalDateTime.now());
+                    habit.getId().toString(), thirtyDaysAgo, LocalDateTime.now());
                     
             completionsByCategory.put(categoryName, 
                     completionsByCategory.getOrDefault(categoryName, 0L) + completions);
@@ -310,11 +310,11 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
             
             // Last week's completion rate
             double lastWeekRate = calculateCompletionRateForPeriod(
-                    habit.getId(), now.minusDays(7), now);
+                    habit.getId().toString(), now.minusDays(7), now);
                     
             // Week before that
             double previousWeekRate = calculateCompletionRateForPeriod(
-                    habit.getId(), now.minusDays(14), now.minusDays(7));
+                    habit.getId().toString(), now.minusDays(14), now.minusDays(7));
                     
             // Simple linear trend
             double trend = lastWeekRate - previousWeekRate;
@@ -349,7 +349,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
     
     // Helper method to calculate completion rate for a specific period
-    private double calculateCompletionRateForPeriod(Long habitId, LocalDateTime start, LocalDateTime end) {
+    private double calculateCompletionRateForPeriod(String habitId, LocalDateTime start, LocalDateTime end) {
         Habit habit = habitRepository.findById(habitId).orElse(null);
         if (habit == null) {
             return 0.0;

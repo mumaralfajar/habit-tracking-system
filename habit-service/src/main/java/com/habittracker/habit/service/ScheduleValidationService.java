@@ -14,5 +14,5 @@ public interface ScheduleValidationService {
     
     int calculateRequiredCompletionsForPeriod(Habit habit, LocalDateTime start, LocalDateTime end);
     
-    boolean hasMetFrequencyRequirements(Long habitId, LocalDateTime start, LocalDateTime end);
+    boolean hasMetFrequencyRequirements(String habitId, LocalDateTime start, LocalDateTime end);
 }

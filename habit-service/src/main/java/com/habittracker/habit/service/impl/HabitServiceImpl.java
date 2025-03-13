@@ -30,12 +30,12 @@ public class HabitServiceImpl implements HabitService {
     }
     
     @Override
-    public List<Habit> getHabitsByUserIdAndCategory(String userId, Long categoryId) {
+    public List<Habit> getHabitsByUserIdAndCategory(String userId, String categoryId) {
         return habitRepository.findAllByUserIdAndCategoryId(userId, categoryId);
     }
     
     @Override
-    public Optional<Habit> getHabitById(Long id) {
+    public Optional<Habit> getHabitById(String id) {
         return habitRepository.findById(id);
     }
     
@@ -59,7 +59,7 @@ public class HabitServiceImpl implements HabitService {
     }
     
     @Override
-    public Habit updateHabit(Long id, Habit habitDetails) {
+    public Habit updateHabit(String id, Habit habitDetails) {
         Habit habit = habitRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + id));
         
@@ -87,7 +87,7 @@ public class HabitServiceImpl implements HabitService {
     }
     
     @Override
-    public void deleteHabit(Long id) {
+    public void deleteHabit(String id) {
         Habit habit = habitRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + id));
         

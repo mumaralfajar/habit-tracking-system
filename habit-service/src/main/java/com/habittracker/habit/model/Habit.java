@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "habits")
@@ -21,12 +22,12 @@ import java.util.Set;
 public class Habit {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     
     @NotNull
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private UUID userId;
     
     @NotBlank
     @Column(nullable = false)

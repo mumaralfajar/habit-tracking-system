@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface CategoryRepository extends JpaRepository<Category, String> {
     
     List<Category> findAllByUserId(String userId);
     
@@ -19,7 +19,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findAllByUserIdOrderByNameAsc(String userId);
     
     @Query("SELECT COUNT(h) FROM Habit h WHERE h.category.id = :categoryId")
-    Long countHabitsByCategoryId(Long categoryId);
+    Long countHabitsByCategoryId(String categoryId);
     
     @Query("SELECT c FROM Category c WHERE c.userId = :userId AND " +
            "(LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +

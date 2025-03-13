@@ -55,7 +55,7 @@ public class ReminderNotificationServiceImpl implements ReminderNotificationServ
         
         // Send notification via Kafka
         try {
-            kafkaTemplate.send(NOTIFICATION_TOPIC, reminder.getHabit().getUserId(), notification);
+            kafkaTemplate.send(NOTIFICATION_TOPIC, reminder.getHabit().getUserId().toString(), notification);
             log.info("Sent reminder notification for habit: {}", reminder.getHabit().getName());
         } catch (Exception e) {
             log.error("Failed to send reminder notification", e);

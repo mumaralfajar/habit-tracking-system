@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface HabitRepository extends JpaRepository<Habit, Long> {
+public interface HabitRepository extends JpaRepository<Habit, String> {
     
     List<Habit> findAllByUserId(String userId);
     
-    List<Habit> findAllByUserIdAndCategoryId(String userId, Long categoryId);
+    List<Habit> findAllByUserIdAndCategoryId(String userId, String categoryId);
     
     @Query("SELECT h FROM Habit h JOIN h.streak s WHERE h.userId = :userId AND s.nextDueAt <= :currentTime")
     List<Habit> findDueHabits(String userId, LocalDateTime currentTime);

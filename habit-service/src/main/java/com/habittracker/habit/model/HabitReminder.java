@@ -4,6 +4,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "habit_reminders")
@@ -15,8 +16,8 @@ import java.time.LocalTime;
 public class HabitReminder {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     
     @ManyToOne
     @JoinColumn(name = "habit_id", nullable = false)
