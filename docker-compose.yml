@@ -200,8 +200,8 @@ services:
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: umar.fajar14@gmail.com
-      SPRING_MAIL_PASSWORD: ysis rmkl pnrp vkab
+      SPRING_MAIL_USERNAME: your@email.com
+      SPRING_MAIL_PASSWORD: your 16 digits app password
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
       SERVER_PORT: 8084
