@@ -1,5 +1,7 @@
 package com.habittracker.habit.service.impl;
 
+import com.habittracker.habit.exception.InvalidRequestException;
+import com.habittracker.habit.exception.ResourceNotFoundException;
 import com.habittracker.habit.model.Category;
 import com.habittracker.habit.model.Habit;
 import com.habittracker.habit.repository.CategoryRepository;
@@ -9,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,27 +35,31 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category createCategory(Category category) {
         // Check if category with same name exists for this user
-        Optional<Category> existing = categoryRepository.findByUserIdAndName(
-                category.getUserId().toString(), category.getName());
-        if (existing.isPresent()) {
-            throw new IllegalArgumentException("Category with name " + category.getName() + 
-                    " already exists for this user");
+        if (categoryRepository.existsByUserIdAndName(
+                category.getUserId().toString(), category.getName())) {
+            throw new InvalidRequestException("Category with name '" + category.getName() + 
+                    "' already exists for this user");
         }
+        
+        // Add default color if not provided
+        if (category.getColor() == null || category.getColor().isEmpty()) {
+            category.setColor("#3498db"); // Default blue color
+        }
+        
         return categoryRepository.save(category);
     }
     
     @Override
     public Category updateCategory(String id, Category categoryDetails) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         
         // Check if name is being changed and if new name already exists
         if (!category.getName().equals(categoryDetails.getName())) {
-            Optional<Category> existingWithName = categoryRepository.findByUserIdAndName(
-                    category.getUserId().toString(), categoryDetails.getName());
-            if (existingWithName.isPresent()) {
-                throw new IllegalArgumentException("Category with name " + categoryDetails.getName() + 
-                        " already exists for this user");
+            if (categoryRepository.existsByUserIdAndName(
+                    category.getUserId().toString(), categoryDetails.getName())) {
+                throw new InvalidRequestException("Category with name '" + categoryDetails.getName() + 
+                        "' already exists for this user");
             }
         }
         
@@ -66,12 +71,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
+    @Transactional
     public void deleteCategory(String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         
         // Update habits to remove this category
-        for (Habit habit : category.getHabits()) {
+        List<Habit> habitsWithCategory = habitRepository.findAllByUserIdAndCategoryId(
+                category.getUserId().toString(), id);
+        
+        for (Habit habit : habitsWithCategory) {
             habit.setCategory(null);
             habitRepository.save(habit);
         }
@@ -86,8 +95,10 @@ public class CategoryServiceImpl implements CategoryService {
     
     @Override
     public Long countHabitsInCategory(String categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryId));
-        return (long) category.getHabits().size();
+        // Check if category exists first
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+                
+        return categoryRepository.countHabitsByCategoryId(categoryId);
     }
 }
