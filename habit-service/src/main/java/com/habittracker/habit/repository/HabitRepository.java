@@ -9,33 +9,34 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface HabitRepository extends JpaRepository<Habit, String> {
+public interface HabitRepository extends JpaRepository<Habit, UUID> {
     
-    List<Habit> findAllByUserId(String userId);
+    List<Habit> findAllByUserId(UUID userId);
     
-    List<Habit> findAllByUserIdAndCategoryId(String userId, String categoryId);
+    List<Habit> findAllByUserIdAndCategoryId(UUID userId, UUID categoryId);
     
     @Query("SELECT h FROM Habit h WHERE h.userId = :userId")
-    Page<Habit> findAllByUserIdPaged(String userId, Pageable pageable);
+    Page<Habit> findAllByUserIdPaged(UUID userId, Pageable pageable);
     
     @Query("SELECT h FROM Habit h WHERE h.userId = :userId AND h.category.id = :categoryId")
-    Page<Habit> findAllByUserIdAndCategoryIdPaged(String userId, String categoryId, Pageable pageable);
+    Page<Habit> findAllByUserIdAndCategoryIdPaged(UUID userId, UUID categoryId, Pageable pageable);
     
     @Query("SELECT h FROM Habit h JOIN h.streak s WHERE h.userId = :userId AND s.nextDueAt <= :currentTime")
-    List<Habit> findDueHabits(String userId, LocalDateTime currentTime);
+    List<Habit> findDueHabits(UUID userId, LocalDateTime currentTime);
     
     @Query("SELECT h FROM Habit h WHERE h.userId = :userId AND h.frequency = :frequency")
-    List<Habit> findByUserIdAndFrequency(String userId, String frequency);
+    List<Habit> findByUserIdAndFrequency(UUID userId, String frequency);
     
     @Query("SELECT h FROM Habit h WHERE h.userId = :userId AND h.createdAt BETWEEN :startDate AND :endDate")
-    List<Habit> findByUserIdAndCreatedAtBetween(String userId, LocalDateTime startDate, LocalDateTime endDate);
+    List<Habit> findByUserIdAndCreatedAtBetween(UUID userId, LocalDateTime startDate, LocalDateTime endDate);
     
     @Query("SELECT h FROM Habit h WHERE h.userId = :userId AND h.priority >= :minPriority ORDER BY h.priority DESC")
-    List<Habit> findByUserIdAndMinimumPriority(String userId, Integer minPriority);
+    List<Habit> findByUserIdAndMinimumPriority(UUID userId, Integer minPriority);
     
     @Query("SELECT h FROM Habit h LEFT JOIN h.trackingRecords r WHERE h.userId = :userId " +
            "GROUP BY h HAVING COUNT(r) = 0")
-    List<Habit> findUnusedHabitsByUserId(String userId);
+    List<Habit> findUnusedHabitsByUserId(UUID userId);
 }

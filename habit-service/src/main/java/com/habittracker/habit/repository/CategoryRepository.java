@@ -7,24 +7,25 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, String> {
+public interface CategoryRepository extends JpaRepository<Category, UUID> {
     
-    List<Category> findAllByUserId(String userId);
+    List<Category> findAllByUserId(UUID userId);
     
-    Optional<Category> findByUserIdAndName(String userId, String name);
+    Optional<Category> findByUserIdAndName(UUID userId, String name);
     
     @Query("SELECT c FROM Category c WHERE c.userId = :userId ORDER BY c.name ASC")
-    List<Category> findAllByUserIdOrderByNameAsc(String userId);
+    List<Category> findAllByUserIdOrderByNameAsc(UUID userId);
     
     @Query("SELECT COUNT(h) FROM Habit h WHERE h.category.id = :categoryId")
-    Long countHabitsByCategoryId(String categoryId);
+    Long countHabitsByCategoryId(UUID categoryId);
     
     @Query("SELECT c FROM Category c WHERE c.userId = :userId AND " +
            "(LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(c.color) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
-    List<Category> searchCategoriesByUserIdAndTerm(String userId, String searchTerm);
+    List<Category> searchCategoriesByUserIdAndTerm(UUID userId, String searchTerm);
     
-    boolean existsByUserIdAndName(String userId, String name);
+    boolean existsByUserIdAndName(UUID userId, String name);
 }

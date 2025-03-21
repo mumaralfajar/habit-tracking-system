@@ -3,24 +3,25 @@ package com.habittracker.habit.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface HabitAnalyticsService {
     
-    Map<String, Object> getUserStats(String userId);
+    Map<String, Object> getUserStats(UUID userId);
     
-    Map<String, Object> getHabitStats(String habitId);
+    Map<String, Object> getHabitStats(UUID habitId);
     
-    Map<String, Object> getUserCompletionTrends(String userId, LocalDateTime start, LocalDateTime end);
+    Map<String, Object> getUserCompletionTrends(UUID userId, LocalDateTime start, LocalDateTime end);
     
-    List<Map<String, Object>> getTopPerformingHabits(String userId, int limit);
+    List<Map<String, Object>> getTopPerformingHabits(UUID userId, int limit);
     
-    List<Map<String, Object>> getHabitsNeedingAttention(String userId, int limit);
+    List<Map<String, Object>> getHabitsNeedingAttention(UUID userId, int limit);
     
-    Map<String, Object> getCategoryDistribution(String userId);
+    Map<String, Object> getCategoryDistribution(UUID userId);
     
-    Map<String, Object> getStreakAnalysis(String userId);
+    Map<String, Object> getStreakAnalysis(UUID userId);
     
-    Map<String, Object> getTimeOfDayAnalysis(String userId);
+    Map<String, Object> getTimeOfDayAnalysis(UUID userId);
     
-    Map<String, Double> getPredictedCompletionRates(String userId);
+    Map<String, Double> getPredictedCompletionRates(UUID userId);
 }

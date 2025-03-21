@@ -15,13 +15,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.kafka.KafkaException;
+import org.springframework.transaction.TransactionException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +46,11 @@ public class AuthService {
     private long verificationTokenExpiration;
 
     @Transactional
+    @Retryable(
+        value = {KafkaException.class, TransactionException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public UserRegistrationResponse register(RegisterRequest request) {
         try {
             CreateUserRequest grpcRequest = CreateUserRequest.newBuilder()
@@ -54,25 +66,43 @@ public class AuthService {
             String token = UUID.randomUUID().toString();
             VerificationToken verificationToken = new VerificationToken();
             verificationToken.setToken(token);
-            verificationToken.setUserId(userId);  // Now using UUID
+            verificationToken.setUserId(userId);
             verificationToken.setExpiresAt(LocalDateTime.now().plusMinutes(verificationTokenExpiration));
             verificationTokenRepository.save(verificationToken);
 
-            // Send verification email via Kafka with error handling
+            // Send verification email via Kafka with error handling and transactions
             UserRegisteredEvent event = new UserRegisteredEvent(
-                userResponse.getUserId(),  // Keep as String for the event
+                userResponse.getUserId(),
                 userResponse.getUsername(),
                 userResponse.getEmail(),
                 token
             );
 
             try {
-                kafkaTemplate.send("user-registered", event).get(10, TimeUnit.SECONDS);
-                log.info("Verification email event sent successfully for user: {}", userResponse.getUsername());
+                // Execute in a Kafka transaction for exactly-once semantics
+                kafkaTemplate.executeInTransaction(operations -> {
+                    try {
+                        SendResult<String, UserRegisteredEvent> result = 
+                            operations.send("user-registered", event).get(10, TimeUnit.SECONDS);
+                        log.info("Verification email event sent successfully: topic={}, partition={}, offset={}",
+                            result.getRecordMetadata().topic(),
+                            result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
+                        return result;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new KafkaException("Kafka send interrupted", e);
+                    } catch (ExecutionException e) {
+                        throw new KafkaException("Error executing Kafka send", e.getCause());
+                    } catch (TimeoutException e) {
+                        throw new KafkaException("Timeout waiting for Kafka send to complete", e);
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to send verification email event: {}", e.getMessage(), e);
-                // Don't fail the registration, but log the error
-                // Consider implementing a retry mechanism or fallback
+                // More sophisticated error handling - store failed events for retry
+                saveFailedEvent(event, e);
+                // Don't fail registration, continue with response
             }
 
             return UserRegistrationResponse.builder()
@@ -83,6 +113,17 @@ public class AuthService {
         } catch (Exception e) {
             log.error("Registration failed: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to register user: " + e.getMessage(), e);
+        }
+    }
+
+    // Add this method to handle failed events
+    private void saveFailedEvent(UserRegisteredEvent event, Exception e) {
+        try {
+            // Send to a dead letter queue for later processing
+            kafkaTemplate.send("user-registered-dlt", event.getUserId(), event);
+            log.info("Failed event moved to DLQ: userId={}", event.getUserId());
+        } catch (Exception dlqEx) {
+            log.error("Failed to send to DLQ: {}", dlqEx.getMessage(), dlqEx);
         }
     }
 
@@ -282,15 +323,32 @@ public class AuthService {
         verificationToken.setExpiresAt(LocalDateTime.now().plusHours(24));
         verificationTokenRepository.save(verificationToken);
 
-        // Send new verification email
+        // Send new verification email with transaction support
         UserRegisteredEvent event = new UserRegisteredEvent(
             userId,
             user.getUsername(),
             user.getEmail(),
             token
         );
-        kafkaTemplate.send("user-registered", event);
         
-        log.info("Verification email resent successfully for user: {}", user.getUsername());
+        try {
+            kafkaTemplate.executeInTransaction(operations -> {
+                try {
+                    return operations.send("user-registered", event).get(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new KafkaException("Kafka send interrupted", e);
+                } catch (ExecutionException e) {
+                    throw new KafkaException("Error executing Kafka send", e.getCause());
+                } catch (TimeoutException e) {
+                    throw new KafkaException("Timeout waiting for Kafka send to complete", e);
+                }
+            });
+            
+            log.info("Verification email resent successfully for user: {}", user.getUsername());
+        } catch (Exception e) {
+            log.error("Failed to resend verification email: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to resend verification email: " + e.getMessage(), e);
+        }
     }
 }

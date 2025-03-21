@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS categories (
-    id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
     color VARCHAR(50),
     icon VARCHAR(100),
@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 CREATE TABLE IF NOT EXISTS habits (
-    id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     frequency VARCHAR(50) NOT NULL,
@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS habits (
     icon VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP,
-    category_id BIGINT,
+    category_id UUID,
     CONSTRAINT fk_habit_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 CREATE TABLE IF NOT EXISTS habit_streaks (
-    habit_id BIGINT PRIMARY KEY,
+    habit_id UUID PRIMARY KEY,
     current_streak INTEGER DEFAULT 0,
     best_streak INTEGER DEFAULT 0,
     last_completed_at TIMESTAMP,
@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS habit_streaks (
 );
 
 CREATE TABLE IF NOT EXISTS habit_tracking_records (
-    id BIGSERIAL PRIMARY KEY,
-    habit_id BIGINT NOT NULL,
+    id UUID PRIMARY KEY,
+    habit_id UUID NOT NULL,
     completed_at TIMESTAMP NOT NULL,
     notes TEXT,
     duration_minutes INTEGER,
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS habit_tracking_records (
 );
 
 CREATE TABLE IF NOT EXISTS habit_reminders (
-    id BIGSERIAL PRIMARY KEY,
-    habit_id BIGINT NOT NULL,
+    id UUID PRIMARY KEY,
+    habit_id UUID NOT NULL,
     remind_at TIME NOT NULL,
     days_of_week VARCHAR(50),
     notification_type VARCHAR(20),

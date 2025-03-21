@@ -1,6 +1,7 @@
 package com.habittracker.habit.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HabitResponseDTO {
-    private String id;
-    private String userId;
+    private UUID id;
+    private UUID userId;
     private String name;
     private String description;
     private String frequency;
@@ -24,7 +25,7 @@ public class HabitResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private String categoryId;
+    private UUID categoryId;
     private String categoryName;
 
     private Integer currentStreak;

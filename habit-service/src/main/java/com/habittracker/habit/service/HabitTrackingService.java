@@ -6,22 +6,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface HabitTrackingService {
     
-    HabitTrackingRecord trackHabitCompletion(String habitId, HabitTrackingRecord record);
+    HabitTrackingRecord trackHabitCompletion(UUID habitId, HabitTrackingRecord record);
     
-    List<HabitTrackingRecord> getTrackingRecordsByHabitId(String habitId);
+    List<HabitTrackingRecord> getTrackingRecordsByHabitId(UUID habitId);
     
-    List<HabitTrackingRecord> getTrackingRecordsByDateRange(String habitId, LocalDateTime start, LocalDateTime end);
+    List<HabitTrackingRecord> getTrackingRecordsByDateRange(UUID habitId, LocalDateTime start, LocalDateTime end);
     
-    List<HabitTrackingRecord> getUserTrackingRecordsByDateRange(String userId, LocalDateTime start, LocalDateTime end);
+    List<HabitTrackingRecord> getUserTrackingRecordsByDateRange(UUID userId, LocalDateTime start, LocalDateTime end);
     
-    Optional<HabitTrackingRecord> getMostRecentCompletion(String habitId);
+    Optional<HabitTrackingRecord> getMostRecentCompletion(UUID habitId);
     
-    Map<String, Integer> getHabitCompletionCountsForUser(String userId, LocalDateTime start, LocalDateTime end);
+    Map<String, Integer> getHabitCompletionCountsForUser(UUID userId, LocalDateTime start, LocalDateTime end);
     
-    Long countCompletionsInRange(String habitId, LocalDateTime start, LocalDateTime end);
+    Long countCompletionsInRange(UUID habitId, LocalDateTime start, LocalDateTime end);
     
-    Map<String, Double> getHabitDifficultyRatings(String userId, LocalDateTime start, LocalDateTime end);
+    Map<String, Double> getHabitDifficultyRatings(UUID userId, LocalDateTime start, LocalDateTime end);
 }

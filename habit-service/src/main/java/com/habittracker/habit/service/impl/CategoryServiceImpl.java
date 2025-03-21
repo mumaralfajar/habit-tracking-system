@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +24,12 @@ public class CategoryServiceImpl implements CategoryService {
     private final HabitRepository habitRepository;
     
     @Override
-    public List<Category> getAllCategoriesByUserId(String userId) {
+    public List<Category> getAllCategoriesByUserId(UUID userId) {
         return categoryRepository.findAllByUserId(userId);
     }
     
     @Override
-    public Optional<Category> getCategoryById(String id) {
+    public Optional<Category> getCategoryById(UUID id) {
         return categoryRepository.findById(id);
     }
     
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category createCategory(Category category) {
         // Check if category with same name exists for this user
         if (categoryRepository.existsByUserIdAndName(
-                category.getUserId().toString(), category.getName())) {
+                category.getUserId(), category.getName())) {
             throw new InvalidRequestException("Category with name '" + category.getName() + 
                     "' already exists for this user");
         }
@@ -50,14 +51,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public Category updateCategory(String id, Category categoryDetails) {
+    public Category updateCategory(UUID id, Category categoryDetails) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         
         // Check if name is being changed and if new name already exists
         if (!category.getName().equals(categoryDetails.getName())) {
             if (categoryRepository.existsByUserIdAndName(
-                    category.getUserId().toString(), categoryDetails.getName())) {
+                    category.getUserId(), categoryDetails.getName())) {
                 throw new InvalidRequestException("Category with name '" + categoryDetails.getName() + 
                         "' already exists for this user");
             }
@@ -72,13 +73,13 @@ public class CategoryServiceImpl implements CategoryService {
     
     @Override
     @Transactional
-    public void deleteCategory(String id) {
+    public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         
         // Update habits to remove this category
         List<Habit> habitsWithCategory = habitRepository.findAllByUserIdAndCategoryId(
-                category.getUserId().toString(), id);
+                category.getUserId(), id);
         
         for (Habit habit : habitsWithCategory) {
             habit.setCategory(null);
@@ -89,12 +90,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public Optional<Category> getCategoryByUserIdAndName(String userId, String name) {
+    public Optional<Category> getCategoryByUserIdAndName(UUID userId, String name) {
         return categoryRepository.findByUserIdAndName(userId, name);
     }
     
     @Override
-    public Long countHabitsInCategory(String categoryId) {
+    public Long countHabitsInCategory(UUID categoryId) {
         // Check if category exists first
         categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));

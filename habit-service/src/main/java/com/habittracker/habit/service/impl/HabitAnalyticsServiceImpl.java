@@ -28,7 +28,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     private final HabitStreakService streakService;
 
     @Override
-    public Map<String, Object> getUserStats(String userId) {
+    public Map<String, Object> getUserStats(UUID userId) {
         Map<String, Object> stats = new HashMap<>();
         
         LocalDateTime now = LocalDateTime.now();
@@ -61,7 +61,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getHabitStats(String habitId) {
+    public Map<String, Object> getHabitStats(UUID habitId) {
         Map<String, Object> stats = new HashMap<>();
         
         LocalDateTime now = LocalDateTime.now();
@@ -109,7 +109,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getUserCompletionTrends(String userId, LocalDateTime start, LocalDateTime end) {
+    public Map<String, Object> getUserCompletionTrends(UUID userId, LocalDateTime start, LocalDateTime end) {
         Map<String, Object> trends = new HashMap<>();
         
         List<HabitTrackingRecord> records = trackingRecordRepository
@@ -150,7 +150,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public List<Map<String, Object>> getTopPerformingHabits(String userId, int limit) {
+    public List<Map<String, Object>> getTopPerformingHabits(UUID userId, int limit) {
         List<HabitStreak> topStreaks = streakRepository.findByUserIdOrderByCurrentStreakDesc(userId);
         
         return topStreaks.stream()
@@ -168,7 +168,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public List<Map<String, Object>> getHabitsNeedingAttention(String userId, int limit) {
+    public List<Map<String, Object>> getHabitsNeedingAttention(UUID userId, int limit) {
         // Get habits with low completion rates
         List<HabitStreak> streaks = streakRepository.findByCompletionRateRange(userId, 0.0, 0.5);
         
@@ -187,7 +187,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getCategoryDistribution(String userId) {
+    public Map<String, Object> getCategoryDistribution(UUID userId) {
         List<Habit> habits = habitRepository.findAllByUserId(userId);
         
         // Count habits by category
@@ -205,7 +205,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
             String categoryName = habit.getCategory() != null ? habit.getCategory().getName() : "Uncategorized";
             
             Long completions = trackingRecordRepository.countCompletionsInRange(
-                    habit.getId().toString(), thirtyDaysAgo, LocalDateTime.now());
+                    habit.getId(), thirtyDaysAgo, LocalDateTime.now());
                     
             completionsByCategory.put(categoryName, 
                     completionsByCategory.getOrDefault(categoryName, 0L) + completions);
@@ -219,7 +219,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getStreakAnalysis(String userId) {
+    public Map<String, Object> getStreakAnalysis(UUID userId) {
         List<HabitStreak> streaks = streakRepository.findByUserId(userId);
         
         // Distribution of streak lengths
@@ -257,7 +257,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Object> getTimeOfDayAnalysis(String userId) {
+    public Map<String, Object> getTimeOfDayAnalysis(UUID userId) {
         // Get all tracking records for the user
         List<HabitTrackingRecord> records = trackingRecordRepository
                 .findByUserIdAndCompletedAtBetween(
@@ -300,7 +300,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
 
     @Override
-    public Map<String, Double> getPredictedCompletionRates(String userId) {
+    public Map<String, Double> getPredictedCompletionRates(UUID userId) {
         List<Habit> habits = habitRepository.findAllByUserId(userId);
         Map<String, Double> predictions = new HashMap<>();
         
@@ -310,11 +310,11 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
             
             // Last week's completion rate
             double lastWeekRate = calculateCompletionRateForPeriod(
-                    habit.getId().toString(), now.minusDays(7), now);
+                    habit.getId(), now.minusDays(7), now);
                     
             // Week before that
             double previousWeekRate = calculateCompletionRateForPeriod(
-                    habit.getId().toString(), now.minusDays(14), now.minusDays(7));
+                    habit.getId(), now.minusDays(14), now.minusDays(7));
                     
             // Simple linear trend
             double trend = lastWeekRate - previousWeekRate;
@@ -349,7 +349,7 @@ public class HabitAnalyticsServiceImpl implements HabitAnalyticsService {
     }
     
     // Helper method to calculate completion rate for a specific period
-    private double calculateCompletionRateForPeriod(String habitId, LocalDateTime start, LocalDateTime end) {
+    private double calculateCompletionRateForPeriod(UUID habitId, LocalDateTime start, LocalDateTime end) {
         Habit habit = habitRepository.findById(habitId).orElse(null);
         if (habit == null) {
             return 0.0;

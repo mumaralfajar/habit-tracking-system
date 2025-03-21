@@ -10,11 +10,28 @@ spring:
       bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}  # Updated to use external port
       group-id: notification-service
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.habitsystem.notification.event,com.habitsystem.auth.event"
+        spring.json.trusted.packages: "com.habitsystem.auth.event,com.habitsystem.notification.event"
         spring.json.value.default.type: "com.habitsystem.notification.event.UserRegisteredEvent"
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        isolation.level: read_committed
+        enable.auto.commit: false
+    listener:
+      type: single
+    retry:
+      enabled: false
+    streams:
+      application-id: notification-service-streams
+      properties:
+        processing.guarantee: exactly_once_v2
+        state.dir: ./kafka-streams-state
+        replication.factor: 1
+        commit.interval.ms: 1000
+  main:
+    allow-bean-definition-overriding: true
 
   mail:
     host: smtp.gmail.com
@@ -27,6 +44,11 @@ spring:
           auth: true
           starttls:
             enable: true
+
+  retry:
+    enabled: false  # Disable Spring retry completely
+  autoconfigure:
+    exclude: org.springframework.kafka.retrytopic.RetryTopicAutoConfiguration
 
 management:
   endpoints:

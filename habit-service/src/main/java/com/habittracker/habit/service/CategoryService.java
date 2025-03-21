@@ -4,20 +4,21 @@ import com.habittracker.habit.model.Category;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface CategoryService {
     
-    List<Category> getAllCategoriesByUserId(String userId);
+    List<Category> getAllCategoriesByUserId(UUID userId);
     
-    Optional<Category> getCategoryById(String id);
+    Optional<Category> getCategoryById(UUID id);
     
     Category createCategory(Category category);
     
-    Category updateCategory(String id, Category categoryDetails);
+    Category updateCategory(UUID id, Category categoryDetails);
     
-    void deleteCategory(String id);
+    void deleteCategory(UUID id);
     
-    Optional<Category> getCategoryByUserIdAndName(String userId, String name);
+    Optional<Category> getCategoryByUserIdAndName(UUID userId, String name);
     
-    Long countHabitsInCategory(String categoryId);
+    Long countHabitsInCategory(UUID categoryId);
 }

@@ -20,17 +20,17 @@ public class HabitStreakServiceImpl implements HabitStreakService {
     private final HabitStreakRepository streakRepository;
     
     @Override
-    public Optional<HabitStreak> getStreakByHabitId(String habitId) {
+    public Optional<HabitStreak> getStreakByHabitId(UUID habitId) {
         return streakRepository.findByHabitId(habitId);
     }
     
     @Override
-    public List<HabitStreak> getStreaksByUserId(String userId) {
+    public List<HabitStreak> getStreaksByUserId(UUID userId) {
         return streakRepository.findByUserId(userId);
     }
     
     @Override
-    public List<HabitStreak> getTopStreaksByUserId(String userId, int limit) {
+    public List<HabitStreak> getTopStreaksByUserId(UUID userId, int limit) {
         return streakRepository.findByUserIdOrderByCurrentStreakDesc(userId)
                 .stream()
                 .limit(limit)
@@ -62,7 +62,7 @@ public class HabitStreakServiceImpl implements HabitStreakService {
     }
     
     @Override
-    public Map<String, Object> getStreakStatistics(String userId) {
+    public Map<String, Object> getStreakStatistics(UUID userId) {
         List<HabitStreak> userStreaks = streakRepository.findByUserId(userId);
         
         int totalCurrentStreak = userStreaks.stream()
@@ -99,12 +99,12 @@ public class HabitStreakServiceImpl implements HabitStreakService {
     }
     
     @Override
-    public List<HabitStreak> getRecentlyBrokenStreaks(String userId, LocalDateTime since) {
+    public List<HabitStreak> getRecentlyBrokenStreaks(UUID userId, LocalDateTime since) {
         return streakRepository.findRecentlyBrokenStreaks(userId, since);
     }
     
     @Override
-    public List<HabitStreak> getStreaksByEfficiency(String userId) {
+    public List<HabitStreak> getStreaksByEfficiency(UUID userId) {
         return streakRepository.findStreaksByEfficiency(userId);
     }
 }

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:15-alpine
     environment:
       POSTGRES_USER: habitsystem
       POSTGRES_PASSWORD: habitsystem
@@ -61,8 +61,6 @@ services:
     build: ./auth-service
     depends_on:
       postgres:
-        condition: service_healthy
-      user-service:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -138,13 +136,6 @@ services:
 
   api-gateway:
     build: ./api-gateway
-    depends_on:
-      auth-service:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
-      habit-service:
-        condition: service_healthy
     environment:
       AUTH_SERVICE_HOST: auth-service
       AUTH_SERVICE_PORT: 8091
@@ -183,6 +174,9 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
     networks:
       - habit-network
 
@@ -200,8 +194,8 @@ services:
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: your@email.com
-      SPRING_MAIL_PASSWORD: your 16 digits app password
+      SPRING_MAIL_USERNAME: umar.fajar14@gmail.com
+      SPRING_MAIL_PASSWORD: tuql ahvt okbk fudm
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
       SERVER_PORT: 8084

@@ -24,7 +24,7 @@ public class CategoryMapper {
             return null;
         }
 
-        Long habitCount = categoryRepository.countHabitsByCategoryId(category.getId().toString());
+        Long habitCount = categoryRepository.countHabitsByCategoryId(category.getId());
         
         return CategoryResponseDTO.builder()
                 .id(category.getId().toString())

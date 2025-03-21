@@ -42,17 +42,17 @@ public class HabitServiceImpl implements HabitService {
     private final HabitMapper habitMapper;
 
     @Override
-    public List<Habit> getAllHabitsByUserId(String userId) {
+    public List<Habit> getAllHabitsByUserId(UUID userId) {
         return habitRepository.findAllByUserId(userId);
     }
     
     @Override
-    public List<Habit> getHabitsByUserIdAndCategory(String userId, String categoryId) {
+    public List<Habit> getHabitsByUserIdAndCategory(UUID userId, UUID categoryId) {
         return habitRepository.findAllByUserIdAndCategoryId(userId, categoryId);
     }
     
     @Override
-    public Optional<Habit> getHabitById(String id) {
+    public Optional<Habit> getHabitById(UUID id) {
         return habitRepository.findById(id);
     }
     
@@ -65,7 +65,7 @@ public class HabitServiceImpl implements HabitService {
         try {
             // Set required fields
             habit.setId(UUID.randomUUID());
-            habit.setUserId(UUID.fromString(dto.getUserId()));
+            habit.setUserId(dto.getUserId());
             habit.setName(dto.getName());
             habit.setFrequency(dto.getFrequency());
             
@@ -78,7 +78,7 @@ public class HabitServiceImpl implements HabitService {
             habit.setCreatedAt(LocalDateTime.now());
             
             // Associate with category if provided
-            if (dto.getCategoryId() != null && !dto.getCategoryId().isEmpty()) {
+            if (dto.getCategoryId() != null) {
                 categoryRepository.findById(dto.getCategoryId())
                     .ifPresentOrElse(
                         habit::setCategory,
@@ -122,7 +122,7 @@ public class HabitServiceImpl implements HabitService {
 
     @Override
     @Transactional(readOnly = true)
-    public HabitResponseDTO getHabitResponseById(String id) {
+    public HabitResponseDTO getHabitResponseById(UUID id) {
         Habit habit = habitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Habit", "id", id));
         
@@ -132,7 +132,7 @@ public class HabitServiceImpl implements HabitService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponseDTO<HabitResponseDTO> getHabitsByUserIdWithPagination(
-            String userId, int page, int size, String sortBy, String sortDirection) {
+        UUID userId, int page, int size, String sortBy, String sortDirection) {
         
         // Validate input parameters
         validatePaginationParams(page, size, sortBy);
@@ -159,7 +159,7 @@ public class HabitServiceImpl implements HabitService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponseDTO<HabitResponseDTO> getHabitsByUserIdAndCategoryWithPagination(
-            String userId, String categoryId, int page, int size, String sortBy, String sortDirection) {
+        UUID userId, UUID categoryId, int page, int size, String sortBy, String sortDirection) {
         
         // Validate input parameters
         validatePaginationParams(page, size, sortBy);
@@ -190,7 +190,7 @@ public class HabitServiceImpl implements HabitService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<HabitResponseDTO> getHighPriorityHabitsResponse(String userId, Integer minPriority) {
+    public List<HabitResponseDTO> getHighPriorityHabitsResponse(UUID userId, Integer minPriority) {
         List<Habit> habits = getHighPriorityHabits(userId, minPriority);
         
         return habits.stream()
@@ -200,7 +200,7 @@ public class HabitServiceImpl implements HabitService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<HabitResponseDTO> getDueHabitsResponse(String userId) {
+    public List<HabitResponseDTO> getDueHabitsResponse(UUID userId) {
         List<Habit> habits = getDueHabits(userId, LocalDateTime.now());
         
         return habits.stream()
@@ -247,7 +247,7 @@ public class HabitServiceImpl implements HabitService {
     
     @Override
     @Transactional
-    public HabitResponseDTO updateHabit(String id, HabitUpdateDTO updateDTO) {
+    public HabitResponseDTO updateHabit(UUID id, HabitUpdateDTO updateDTO) {
         try {
             // Find the habit by ID
             Habit habit = habitRepository.findById(id)
@@ -259,19 +259,14 @@ public class HabitServiceImpl implements HabitService {
             
             // Update category if provided
             if (updateDTO.getCategoryId() != null) {
-                if (updateDTO.getCategoryId().isEmpty()) {
-                    // Clear the category if empty string is provided
-                    habit.setCategory(null);
-                } else {
-                    // Set the new category
-                    categoryRepository.findById(updateDTO.getCategoryId())
-                        .ifPresentOrElse(
-                            habit::setCategory,
-                            () -> {
-                                throw new ResourceNotFoundException("Category", "id", updateDTO.getCategoryId());
-                            }
-                        );
-                }
+                // Set the new category
+                categoryRepository.findById(updateDTO.getCategoryId())
+                    .ifPresentOrElse(
+                        habit::setCategory,
+                        () -> {
+                            throw new ResourceNotFoundException("Category", "id", updateDTO.getCategoryId());
+                        }
+                    );
             }
             
             // Update habit fields from DTO
@@ -307,7 +302,7 @@ public class HabitServiceImpl implements HabitService {
     
     @Override
     @Transactional
-    public DeleteResponseDTO deleteHabit(String id) {
+    public DeleteResponseDTO deleteHabit(UUID id) {
         try {
             // Find the habit to ensure it exists
             Habit habit = habitRepository.findById(id)
@@ -339,27 +334,27 @@ public class HabitServiceImpl implements HabitService {
     }
     
     @Override
-    public List<Habit> getDueHabits(String userId, LocalDateTime currentTime) {
+    public List<Habit> getDueHabits(UUID userId, LocalDateTime currentTime) {
         return habitRepository.findDueHabits(userId, currentTime);
     }
     
     @Override
-    public List<Habit> getHabitsByFrequency(String userId, String frequency) {
+    public List<Habit> getHabitsByFrequency(UUID userId, String frequency) {
         return habitRepository.findByUserIdAndFrequency(userId, frequency);
     }
     
     @Override
-    public List<Habit> getRecentlyCreatedHabits(String userId, LocalDateTime since) {
+    public List<Habit> getRecentlyCreatedHabits(UUID userId, LocalDateTime since) {
         return habitRepository.findByUserIdAndCreatedAtBetween(userId, since, LocalDateTime.now());
     }
     
     @Override
-    public List<Habit> getHighPriorityHabits(String userId, Integer minPriority) {
+    public List<Habit> getHighPriorityHabits(UUID userId, Integer minPriority) {
         return habitRepository.findByUserIdAndMinimumPriority(userId, minPriority);
     }
     
     @Override
-    public List<Habit> getUnusedHabits(String userId) {
+    public List<Habit> getUnusedHabits(UUID userId) {
         return habitRepository.findUnusedHabitsByUserId(userId);
     }
 }

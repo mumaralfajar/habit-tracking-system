@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,7 +41,7 @@ public class CategoryController {
      * Get all categories for a user
      */
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByUserId(@RequestParam String userId) {
+    public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByUserId(@RequestParam UUID userId) {
         List<Category> categories = categoryService.getAllCategoriesByUserId(userId);
         List<CategoryResponseDTO> responseDTOs = categories.stream()
                 .map(categoryMapper::toResponseDTO)
@@ -52,7 +53,7 @@ public class CategoryController {
      * Get a specific category by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable String id) {
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable UUID id) {
         Category category = categoryService.getCategoryById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         return ResponseEntity.ok(categoryMapper.toResponseDTO(category));
@@ -63,7 +64,7 @@ public class CategoryController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> updateCategory(
-            @PathVariable String id, 
+            @PathVariable UUID id, 
             @Valid @RequestBody CategoryUpdateDTO updateDTO) {
         Category updatedCategory = categoryService.updateCategory(id, convertForUpdate(id, updateDTO));
         return ResponseEntity.ok(categoryMapper.toResponseDTO(updatedCategory));
@@ -73,7 +74,7 @@ public class CategoryController {
      * Delete a category
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<DeleteResponseDTO> deleteCategory(@PathVariable String id) {
+    public ResponseEntity<DeleteResponseDTO> deleteCategory(@PathVariable UUID id) {
         Category category = categoryService.getCategoryById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         
@@ -95,7 +96,7 @@ public class CategoryController {
      */
     @GetMapping("/search")
     public ResponseEntity<CategoryResponseDTO> getCategoryByName(
-            @RequestParam String userId,
+            @RequestParam UUID userId,
             @RequestParam String name) {
         return categoryService.getCategoryByUserIdAndName(userId, name)
                 .map(categoryMapper::toResponseDTO)
@@ -107,7 +108,7 @@ public class CategoryController {
      * Count habits in a category
      */
     @GetMapping("/{id}/habits/count")
-    public ResponseEntity<Long> countHabitsInCategory(@PathVariable String id) {
+    public ResponseEntity<Long> countHabitsInCategory(@PathVariable UUID id) {
         Long count = categoryService.countHabitsInCategory(id);
         return ResponseEntity.ok(count);
     }
@@ -115,7 +116,7 @@ public class CategoryController {
     /**
      * Helper method to convert update DTO to entity for the service layer
      */
-    private Category convertForUpdate(String id, CategoryUpdateDTO updateDTO) {
+    private Category convertForUpdate(UUID id, CategoryUpdateDTO updateDTO) {
         Category category = categoryService.getCategoryById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         

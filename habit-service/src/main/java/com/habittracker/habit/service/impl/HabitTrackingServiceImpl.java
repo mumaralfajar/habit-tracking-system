@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     private final ScheduleValidationService scheduleValidationService;
     
     @Override
-    public HabitTrackingRecord trackHabitCompletion(String habitId, HabitTrackingRecord record) {
+    public HabitTrackingRecord trackHabitCompletion(UUID habitId, HabitTrackingRecord record) {
         Habit habit = habitRepository.findById(habitId)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + habitId));
         
@@ -50,27 +51,27 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     }
     
     @Override
-    public List<HabitTrackingRecord> getTrackingRecordsByHabitId(String habitId) {
+    public List<HabitTrackingRecord> getTrackingRecordsByHabitId(UUID habitId) {
         return trackingRecordRepository.findByHabitId(habitId);
     }
     
     @Override
-    public List<HabitTrackingRecord> getTrackingRecordsByDateRange(String habitId, LocalDateTime start, LocalDateTime end) {
+    public List<HabitTrackingRecord> getTrackingRecordsByDateRange(UUID habitId, LocalDateTime start, LocalDateTime end) {
         return trackingRecordRepository.findByHabitIdAndCompletedAtBetween(habitId, start, end);
     }
     
     @Override
-    public List<HabitTrackingRecord> getUserTrackingRecordsByDateRange(String userId, LocalDateTime start, LocalDateTime end) {
+    public List<HabitTrackingRecord> getUserTrackingRecordsByDateRange(UUID userId, LocalDateTime start, LocalDateTime end) {
         return trackingRecordRepository.findByUserIdAndCompletedAtBetween(userId, start, end);
     }
     
     @Override
-    public Optional<HabitTrackingRecord> getMostRecentCompletion(String habitId) {
+    public Optional<HabitTrackingRecord> getMostRecentCompletion(UUID habitId) {
         return trackingRecordRepository.findMostRecentByHabitId(habitId);
     }
     
     @Override
-    public Map<String, Integer> getHabitCompletionCountsForUser(String userId, LocalDateTime start, LocalDateTime end) {
+    public Map<String, Integer> getHabitCompletionCountsForUser(UUID userId, LocalDateTime start, LocalDateTime end) {
         List<Object[]> results = trackingRecordRepository.getCompletionStatsByUserIdBetweenDates(userId, start, end);
         Map<String, Integer> completionCounts = new HashMap<>();
         
@@ -84,12 +85,12 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
     }
     
     @Override
-    public Long countCompletionsInRange(String habitId, LocalDateTime start, LocalDateTime end) {
+    public Long countCompletionsInRange(UUID habitId, LocalDateTime start, LocalDateTime end) {
         return trackingRecordRepository.countCompletionsInRange(habitId, start, end);
     }
     
     @Override
-    public Map<String, Double> getHabitDifficultyRatings(String userId, LocalDateTime start, LocalDateTime end) {
+    public Map<String, Double> getHabitDifficultyRatings(UUID userId, LocalDateTime start, LocalDateTime end) {
         List<Object[]> results = trackingRecordRepository.getCompletionStatsByUserIdBetweenDates(userId, start, end);
         Map<String, Double> difficultyRatings = new HashMap<>();
         
@@ -152,7 +153,7 @@ public class HabitTrackingServiceImpl implements HabitTrackingService {
         
         // Get actual completions
         long actualCompletions = trackingRecordRepository.countCompletionsInRange(
-                habit.getId().toString(), startOfTracking, now);
+                habit.getId(), startOfTracking, now);
         
         // Calculate and set completion rate
         double completionRate = (totalExpectedCompletions > 0)

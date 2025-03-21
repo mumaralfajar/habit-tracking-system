@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 
 @Data
@@ -20,7 +22,7 @@ public class HabitUpdateDTO {
     private String frequency;
     
     // Optional fields
-    private String categoryId;
+    private UUID categoryId;
     private String description;
     private Integer priority;
     private String schedule;

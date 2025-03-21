@@ -14,9 +14,31 @@ public class UserRegistrationListener {
     
     private final EmailService emailService;
     
-    @KafkaListener(topics = "user-registered", groupId = "notification-service")
+    @KafkaListener(
+        topics = "user-registered", 
+        groupId = "notification-service",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
     public void handleUserRegistration(UserRegisteredEvent event) {
-        log.info("Received user registration event for user: {}", event.getUsername());
+        log.info("Received registration event for user: {}", 
+                event.getUsername() != null ? event.getUsername() : "unknown");
+        
+        try {
+            processRegistrationEvent(event);
+        } catch (Exception e) {
+            log.error("Error processing registration: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process registration", e);
+        }
+    }
+    
+    private void processRegistrationEvent(UserRegisteredEvent event) {
+        log.info("Processing registration event for user: {}", event.getUsername());
+        
+        if (event.getEmail() == null) {
+            log.error("Invalid event - missing email address");
+            return;
+        }
+        
         try {
             emailService.sendVerificationEmail(
                 event.getEmail(), 
@@ -25,8 +47,26 @@ public class UserRegistrationListener {
             );
             log.info("Verification email sent successfully to: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Failed to send verification email to {}: {}", 
-                event.getEmail(), e.getMessage(), e);
+            log.error("Failed to send email to {}: {}", 
+                event.getEmail(), e.getMessage());
+            throw e;  // Rethrow to trigger retry mechanism
+        }
+    }
+    
+    @KafkaListener(
+        topics = "user-registered-dlt", 
+        groupId = "notification-service-dlt"
+    )
+    public void processDltMessages(UserRegisteredEvent event) {
+        log.warn("Processing message from DLT: userId={}, username={}",
+                event.getUserId(), event.getUsername());
+        
+        try {
+            // Implement special handling for DLT messages
+            // For example, store in database for manual review
+            log.info("DLT message processed for user ID: {}", event.getUserId());
+        } catch (Exception e) {
+            log.error("Error processing DLT message: {}", e.getMessage(), e);
         }
     }
 }

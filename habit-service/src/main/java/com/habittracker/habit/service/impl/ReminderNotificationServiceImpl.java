@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +27,7 @@ public class ReminderNotificationServiceImpl implements ReminderNotificationServ
 
     private final HabitReminderRepository reminderRepository;
     private final HabitService habitService;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<UUID, Object> kafkaTemplate;
     
     private static final String NOTIFICATION_TOPIC = "habit-notifications";
     
@@ -55,7 +56,7 @@ public class ReminderNotificationServiceImpl implements ReminderNotificationServ
         
         // Send notification via Kafka
         try {
-            kafkaTemplate.send(NOTIFICATION_TOPIC, reminder.getHabit().getUserId().toString(), notification);
+            kafkaTemplate.send(NOTIFICATION_TOPIC, reminder.getHabit().getUserId(), notification);
             log.info("Sent reminder notification for habit: {}", reminder.getHabit().getName());
         } catch (Exception e) {
             log.error("Failed to send reminder notification", e);
@@ -63,7 +64,7 @@ public class ReminderNotificationServiceImpl implements ReminderNotificationServ
     }
     
     @Override
-    public void sendDueHabitNotifications(String userId) {
+    public void sendDueHabitNotifications(UUID userId) {
         List<Habit> dueHabits = habitService.getDueHabits(userId, LocalDateTime.now());
         
         for (Habit habit : dueHabits) {

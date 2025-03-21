@@ -33,22 +33,20 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 3
+      transaction-id-prefix: auth-tx-
       properties:
-        delivery.timeout.ms: 120000
-        retry.backoff.ms: 1000
-        max.block.ms: 60000
-        request.timeout.ms: 30000
         enable.idempotence: true
-        max.in.flight.requests.per.connection: 5
-        reconnect.backoff.ms: 1000
-        reconnect.backoff.max.ms: 10000
         acks: all
-        batch.size: 16384
-        linger.ms: 100
-        buffer.memory: 33554432
-        spring.json.add.type.headers: true
-        spring.json.trusted.packages: "com.habitsystem.auth.event"
+        retries: 10
+        max.in.flight.requests.per.connection: 1
+        delivery.timeout.ms: 120000
+    streams:
+      application-id: auth-service-streams
+      properties:
+        processing.guarantee: exactly_once_v2
+        state.dir: ./kafka-streams-state
+        replication.factor: 1
+        commit.interval.ms: 1000
 
 logging:
   level:

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,13 +23,13 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     private final HabitRepository habitRepository;
     
     @Override
-    public List<HabitReminder> getRemindersByHabitId(String habitId) {
+    public List<HabitReminder> getRemindersByHabitId(UUID habitId) {
         return reminderRepository.findByHabitId(habitId);
     }
     
     @Override
     public HabitReminder createReminder(HabitReminder reminder) {
-        Habit habit = habitRepository.findById(String.valueOf(reminder.getHabit().getId()))
+        Habit habit = habitRepository.findById(reminder.getHabit().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found with id: " + 
                         reminder.getHabit().getId()));
         
@@ -37,7 +38,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public HabitReminder updateReminder(String id, HabitReminder reminderDetails) {
+    public HabitReminder updateReminder(UUID id, HabitReminder reminderDetails) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         
@@ -51,7 +52,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public void deleteReminder(String id) {
+    public void deleteReminder(UUID id) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         
@@ -59,7 +60,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public void toggleReminderStatus(String id, boolean enabled) {
+    public void toggleReminderStatus(UUID id, boolean enabled) {
         HabitReminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reminder not found with id: " + id));
         
@@ -68,7 +69,7 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public List<HabitReminder> getActiveRemindersByUserId(String userId) {
+    public List<HabitReminder> getActiveRemindersByUserId(UUID userId) {
         return reminderRepository.findActiveRemindersByUserId(userId);
     }
     
@@ -78,12 +79,12 @@ public class HabitReminderServiceImpl implements HabitReminderService {
     }
     
     @Override
-    public List<HabitReminder> getActiveRemindersByUserIdAndDayOfWeek(String userId, String dayOfWeek) {
+    public List<HabitReminder> getActiveRemindersByUserIdAndDayOfWeek(UUID userId, String dayOfWeek) {
         return reminderRepository.findActiveRemindersByUserIdAndDayOfWeek(userId, dayOfWeek);
     }
     
     @Override
-    public List<HabitReminder> getActiveRemindersByUserIdAndNotificationType(String userId, String notificationType) {
+    public List<HabitReminder> getActiveRemindersByUserIdAndNotificationType(UUID userId, String notificationType) {
         return reminderRepository.findActiveRemindersByUserIdAndNotificationType(userId, notificationType);
     }
 }

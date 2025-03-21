@@ -1,5 +1,7 @@
 package com.habittracker.habit.exception;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -11,9 +13,9 @@ public class ResourceNotFoundException extends HabitServiceException {
     
     private final String resourceName;
     private final String fieldName;
-    private final String fieldValue;
+    private final UUID fieldValue;
     
-    public ResourceNotFoundException(String resourceName, String fieldName, String fieldValue) {
+    public ResourceNotFoundException(String resourceName, String fieldName, UUID fieldValue) {
         super(String.format("%s not found with %s: '%s'", resourceName, fieldName, fieldValue));
         this.resourceName = resourceName;
         this.fieldName = fieldName;
@@ -28,7 +30,7 @@ public class ResourceNotFoundException extends HabitServiceException {
         return fieldName;
     }
     
-    public String getFieldValue() {
+    public UUID getFieldValue() {
         return fieldValue;
     }
 }

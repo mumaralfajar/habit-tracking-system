@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -34,7 +35,7 @@ public class HabitController {
      * Get a single habit by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<HabitResponseDTO> getHabitById(@PathVariable String id) {
+    public ResponseEntity<HabitResponseDTO> getHabitById(@PathVariable UUID id) {
         HabitResponseDTO habit = habitService.getHabitResponseById(id);
         return ResponseEntity.ok(habit);
     }
@@ -44,16 +45,16 @@ public class HabitController {
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<PagedResponseDTO<HabitResponseDTO>> getHabitsByUserId(
-            @PathVariable String userId,
+            @PathVariable UUID userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) UUID categoryId,
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         
         PagedResponseDTO<HabitResponseDTO> response;
         
-        if (categoryId != null && !categoryId.isEmpty()) {
+        if (categoryId != null) {
             response = habitService.getHabitsByUserIdAndCategoryWithPagination(
                     userId, categoryId, page, size, sortBy, sortDir);
         } else {
@@ -69,7 +70,7 @@ public class HabitController {
      */
     @GetMapping("/user/{userId}/priority")
     public ResponseEntity<List<HabitResponseDTO>> getHighPriorityHabits(
-            @PathVariable String userId,
+            @PathVariable UUID userId,
             @RequestParam(defaultValue = "3") Integer minPriority) {
         
         List<HabitResponseDTO> highPriorityHabits = habitService.getHighPriorityHabitsResponse(userId, minPriority);
@@ -80,7 +81,7 @@ public class HabitController {
      * Get all due habits for a user
      */
     @GetMapping("/user/{userId}/due")
-    public ResponseEntity<List<HabitResponseDTO>> getDueHabits(@PathVariable String userId) {
+    public ResponseEntity<List<HabitResponseDTO>> getDueHabits(@PathVariable UUID userId) {
         List<HabitResponseDTO> dueHabits = habitService.getDueHabitsResponse(userId);
         return ResponseEntity.ok(dueHabits);
     }
@@ -90,7 +91,7 @@ public class HabitController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<HabitResponseDTO> updateHabit(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @Valid @RequestBody HabitUpdateDTO habitUpdateDTO) {
         HabitResponseDTO updatedHabit = habitService.updateHabit(id, habitUpdateDTO);
         return ResponseEntity.ok(updatedHabit);
@@ -100,7 +101,7 @@ public class HabitController {
      * Delete a habit by ID
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<DeleteResponseDTO> deleteHabit(@PathVariable String id) {
+    public ResponseEntity<DeleteResponseDTO> deleteHabit(@PathVariable UUID id) {
         DeleteResponseDTO response = habitService.deleteHabit(id);
         return ResponseEntity.ok(response);
     }

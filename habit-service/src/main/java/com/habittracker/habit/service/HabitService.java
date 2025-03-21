@@ -10,13 +10,14 @@ import com.habittracker.habit.model.Habit;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface HabitService {
-    List<Habit> getAllHabitsByUserId(String userId);
+    List<Habit> getAllHabitsByUserId(UUID userId);
     
-    List<Habit> getHabitsByUserIdAndCategory(String userId, String categoryId);
+    List<Habit> getHabitsByUserIdAndCategory(UUID userId, UUID categoryId);
     
-    Optional<Habit> getHabitById(String id);
+    Optional<Habit> getHabitById(UUID id);
     
     HabitResponseDTO createHabit(HabitRequestDTO habitRequestDTO);
     
@@ -24,30 +25,30 @@ public interface HabitService {
     // Habit updateHabit(String id, Habit habitDetails);
     
     // New method for updating with DTO and returning DTO
-    HabitResponseDTO updateHabit(String id, HabitUpdateDTO habitUpdateDTO);
+    HabitResponseDTO updateHabit(UUID id, HabitUpdateDTO habitUpdateDTO);
     
-    DeleteResponseDTO deleteHabit(String id);
+    DeleteResponseDTO deleteHabit(UUID id);
     
-    List<Habit> getDueHabits(String userId, LocalDateTime currentTime);
+    List<Habit> getDueHabits(UUID userId, LocalDateTime currentTime);
     
-    List<Habit> getHabitsByFrequency(String userId, String frequency);
+    List<Habit> getHabitsByFrequency(UUID userId, String frequency);
     
-    List<Habit> getRecentlyCreatedHabits(String userId, LocalDateTime since);
+    List<Habit> getRecentlyCreatedHabits(UUID userId, LocalDateTime since);
     
-    List<Habit> getHighPriorityHabits(String userId, Integer minPriority);
+    List<Habit> getHighPriorityHabits(UUID userId, Integer minPriority);
     
-    List<Habit> getUnusedHabits(String userId);
+    List<Habit> getUnusedHabits(UUID userId);
     
     // New methods for getting habit data with DTOs
-    HabitResponseDTO getHabitResponseById(String id);
+    HabitResponseDTO getHabitResponseById(UUID id);
     
     PagedResponseDTO<HabitResponseDTO> getHabitsByUserIdWithPagination(
-            String userId, int page, int size, String sortBy, String sortDirection);
+        UUID userId, int page, int size, String sortBy, String sortDirection);
     
     PagedResponseDTO<HabitResponseDTO> getHabitsByUserIdAndCategoryWithPagination(
-            String userId, String categoryId, int page, int size, String sortBy, String sortDirection);
+        UUID userId, UUID categoryId, int page, int size, String sortBy, String sortDirection);
     
-    List<HabitResponseDTO> getHighPriorityHabitsResponse(String userId, Integer minPriority);
+    List<HabitResponseDTO> getHighPriorityHabitsResponse(UUID userId, Integer minPriority);
     
-    List<HabitResponseDTO> getDueHabitsResponse(String userId);
+    List<HabitResponseDTO> getDueHabitsResponse(UUID userId);
 }

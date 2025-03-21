@@ -20,8 +20,8 @@ public class HabitMapper {
         }
 
         HabitResponseDTO responseDTO = new HabitResponseDTO();
-        responseDTO.setId(habit.getId().toString());
-        responseDTO.setUserId(habit.getUserId().toString());
+        responseDTO.setId(habit.getId());
+        responseDTO.setUserId(habit.getUserId());
         responseDTO.setName(habit.getName());
         responseDTO.setDescription(habit.getDescription());
         responseDTO.setFrequency(habit.getFrequency());
@@ -33,7 +33,7 @@ public class HabitMapper {
         responseDTO.setUpdatedAt(habit.getUpdatedAt());
         
         if (habit.getCategory() != null) {
-            responseDTO.setCategoryId(habit.getCategory().getId().toString());
+            responseDTO.setCategoryId(habit.getCategory().getId());
             responseDTO.setCategoryName(habit.getCategory().getName());
         }
         

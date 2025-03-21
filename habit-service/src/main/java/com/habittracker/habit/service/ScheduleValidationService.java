@@ -3,6 +3,7 @@ package com.habittracker.habit.service;
 import com.habittracker.habit.model.Habit;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public interface ScheduleValidationService {
     
@@ -14,5 +15,5 @@ public interface ScheduleValidationService {
     
     int calculateRequiredCompletionsForPeriod(Habit habit, LocalDateTime start, LocalDateTime end);
     
-    boolean hasMetFrequencyRequirements(String habitId, LocalDateTime start, LocalDateTime end);
+    boolean hasMetFrequencyRequirements(UUID habitId, LocalDateTime start, LocalDateTime end);
 }
