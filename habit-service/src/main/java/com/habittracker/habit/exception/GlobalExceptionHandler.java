@@ -1,16 +1,20 @@
 package com.habittracker.habit.exception;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -25,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * Centralizes exception handling across all controllers.
  */
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
@@ -33,14 +37,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(
-            ResourceNotFoundException ex, WebRequest request) {
+            ResourceNotFoundException ex) {
         
         log.error("Resource not found: {}", ex.getMessage());
         
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
-                .path(getRequestPath(request))
                 .timestamp(LocalDateTime.now())
                 .build();
         
@@ -59,7 +62,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
-                .path(getRequestPath(request))
                 .timestamp(LocalDateTime.now())
                 .build();
         
@@ -78,7 +80,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(ex.getMessage())
-                .path(getRequestPath(request))
                 .timestamp(LocalDateTime.now())
                 .build();
         
@@ -97,7 +98,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .message(ex.getMessage())
-                .path(getRequestPath(request))
                 .timestamp(LocalDateTime.now())
                 .build();
         
@@ -114,7 +114,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .message("An unexpected error occurred. Please try again later.")
-                .path(getRequestPath(request))
                 .timestamp(LocalDateTime.now())
                 .build();
         
@@ -124,24 +123,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handles validation errors by returning a 400 BAD REQUEST response with validation details.
      */
+    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+            MethodArgumentNotValidException ex, 
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+            
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
         
-        log.error("Validation error: {}", ex.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("errors", errors);
         
-        List<ErrorResponseDTO.ValidationError> validationErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(this::mapFieldError)
-                .collect(Collectors.toList());
-        
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message("Validation failed")
-                .path(getRequestPath(request))
-                .timestamp(LocalDateTime.now())
-                .validationErrors(validationErrors)
-                .build();
-        
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     
     /**

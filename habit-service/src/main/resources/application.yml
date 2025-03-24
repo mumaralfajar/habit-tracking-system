@@ -59,3 +59,8 @@ kafka:
   topics:
     habit-notifications: habit-notifications
     habit-completions: habit-completions
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:bXktMzItY2hhcmFjdGVyLXVsdHJhLXNlY3VyZS1hbmQtdWx0cmEtbG9uZy1zZWNyZXQ=}

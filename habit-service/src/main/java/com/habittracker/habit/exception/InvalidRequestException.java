@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Exception thrown when a client sends an invalid request.
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class InvalidRequestException extends HabitServiceException {
+public class InvalidRequestException extends RuntimeException {
     
     public InvalidRequestException(String message) {
         super(message);

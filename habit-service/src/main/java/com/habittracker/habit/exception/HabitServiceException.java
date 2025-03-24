@@ -1,8 +1,9 @@
 package com.habittracker.habit.exception;
 
-/**
- * Base exception class for Habit Service exceptions.
- */
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class HabitServiceException extends RuntimeException {
     
     public HabitServiceException(String message) {

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HabitRequestDTO {
-    @NotBlank(message = "User ID is required")
+    @NotNull(message = "User ID is required")
     private UUID userId;
     
     @NotBlank(message = "Habit name is required")
