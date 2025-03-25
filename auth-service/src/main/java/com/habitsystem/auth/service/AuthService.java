@@ -52,6 +52,7 @@ public class AuthService {
         backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public UserRegistrationResponse register(RegisterRequest request) {
+        
         try {
             CreateUserRequest grpcRequest = CreateUserRequest.newBuilder()
                 .setUsername(request.getUsername())
@@ -79,25 +80,10 @@ public class AuthService {
             );
 
             try {
-                // Execute in a Kafka transaction for exactly-once semantics
-                kafkaTemplate.executeInTransaction(operations -> {
-                    try {
-                        SendResult<String, UserRegisteredEvent> result = 
-                            operations.send("user-registered", event).get(10, TimeUnit.SECONDS);
-                        log.info("Verification email event sent successfully: topic={}, partition={}, offset={}",
-                            result.getRecordMetadata().topic(),
-                            result.getRecordMetadata().partition(),
-                            result.getRecordMetadata().offset());
-                        return result;
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new KafkaException("Kafka send interrupted", e);
-                    } catch (ExecutionException e) {
-                        throw new KafkaException("Error executing Kafka send", e.getCause());
-                    } catch (TimeoutException e) {
-                        throw new KafkaException("Timeout waiting for Kafka send to complete", e);
-                    }
-                });
+                SendResult<String, UserRegisteredEvent> result = 
+                    kafkaTemplate.send("user-registered", event).get(10, TimeUnit.SECONDS);
+                log.info("Verification email event sent successfully: topic={}...", 
+                    result.getRecordMetadata().topic());
             } catch (Exception e) {
                 log.error("Failed to send verification email event: {}", e.getMessage(), e);
                 // More sophisticated error handling - store failed events for retry
